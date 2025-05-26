@@ -30,10 +30,17 @@ class ImageTransformer:
             self.points.append((x, y))
             print(f"Point {len(self.points)} selected at coordinates ({x}, {y})")
             cv2.circle(self.display_image, (x, y), 8, (0, 0, 255), -1)
-            cv2.imshow(MAIN_WINDOW_NAME, self.display_image)
+            
+       
             if len(self.points) == 4:
-                print("All 4 points selected. Ready for transformation.")
-                self.points = self.order_points(self.points)
+                # Draw lines between all points to form a quadrilateral
+                cv2.line(self.display_image, self.points[0], self.points[1], (0, 255, 0), 2)
+                cv2.line(self.display_image, self.points[1], self.points[2], (0, 255, 0), 2)
+                cv2.line(self.display_image, self.points[2], self.points[3], (0, 255, 0), 2)
+                cv2.line(self.display_image, self.points[3], self.points[0], (0, 255, 0), 2)
+                self.points = ordered_points
+
+            cv2.imshow(MAIN_WINDOW_NAME, self.display_image)
 
     def transform_perspective(self, image: np.ndarray, points: np.ndarray, *, width: int, height: int, copy: bool = False) -> np.ndarray:
         """Apply perspective transformation based on selected points"""
