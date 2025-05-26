@@ -157,11 +157,17 @@ class ImageTransformer:
                     print(f"Saving warped image to {output_path}...")
                     cv2.imwrite(output_path, warped_image)
                     print(f"Warped image saved to {output_path}")
-                    cv2.destroyWindow(RESULT_WINDOW_NAME)
+                    try:
+                        cv2.destroyWindow(RESULT_WINDOW_NAME)
+                    except Exception:
+                        pass
                     break
                 elif key == ESCAPE_KEY:
                     print("Restarting selection...")
-                    cv2.destroyWindow(RESULT_WINDOW_NAME)
+                    try:
+                        cv2.destroyWindow(RESULT_WINDOW_NAME)
+                    except Exception:
+                        pass
                     break
                 elif self.is_main_window_closed():
                     print("Exiting due to window closure.")
