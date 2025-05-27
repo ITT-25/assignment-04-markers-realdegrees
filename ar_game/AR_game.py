@@ -4,6 +4,7 @@ import pyglet
 from pyglet.window import Window
 from pyglet.graphics import Batch
 from frame_transformer import FrameTransformer
+from marker_detection import MarkerDetection
 from camera import Camera
 from config import Config
 
@@ -17,6 +18,7 @@ class GameManager(Window):
         super().__init__(Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT, "Fitness Trainer")
         
         self.camera = Camera(video_id=video_id)
+        self.marker_detection = MarkerDetection()
 
         # Init graphics stuff
         self.batch = Batch()
@@ -47,7 +49,8 @@ class GameManager(Window):
         frame = self.camera.get_frame()
         if frame is None:
             return
-        self.background.image = FrameTransformer.cv2_to_pyglet(frame)
+                    
+        inner_corners, board_center = self.marker_detection.get_board_data(frame)
         self.batch.draw()
 
     def on_close(self):
