@@ -1,5 +1,6 @@
 # Main entry point for AR game
 import click
+import cv2
 import pyglet
 from pyglet.window import Window
 from pyglet.graphics import Batch
@@ -17,7 +18,7 @@ class GameManager(Window):
         mirror: bool,
     ):
         super().__init__(Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT, "Fitness Trainer")
-        
+        self.mirror = mirror
         self.camera = Camera(video_id=video_id)
         self.marker_detection = MarkerDetection()
         self.perspective_transformer = PerspectiveTransformer()
@@ -56,9 +57,14 @@ class GameManager(Window):
         perspective_transformed_frame = None
         if inner_corners is not None:
             perspective_transformed_frame = self.perspective_transformer.transform(frame, inner_corners)
+            if self.mirror:
+                perspective_transformed_frame = cv2.flip(perspective_transformed_frame, 1)
+        
         self.background.image = FrameTransformer.cv2_to_pyglet(perspective_transformed_frame if perspective_transformed_frame is not None else frame)
 
         self.batch.draw()
+    
+        
 
     def on_close(self):
         self.camera.release()
@@ -70,11 +76,13 @@ class GameManager(Window):
 @click.option('--mirror', is_flag=True, help='Mirror the camera feed horizontally')
 @click.option('--width', default=1920, type=int, help='Width of the application window')
 @click.option('--height', default=1080, type=int, help='Height of the application window')
-def main(video_id: int, mirror: bool, width: int, height: int) -> None:
+@click.option('--debug', is_flag=True, help='Enable debug mode')
+def main(video_id: int, mirror: bool, width: int, height: int, debug: bool) -> None:
     """Start the AR board game with the given configuration"""
 
     Config.WINDOW_WIDTH = width
     Config.WINDOW_HEIGHT = height
+    Config.DEBUG = debug
     
     GameManager(
         video_id=video_id,
