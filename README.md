@@ -22,4 +22,6 @@ Controls are displayed in the window title. Console logs give further info about
 
 ### AR Game
 
+TODO: Write disclaimer about webcam performance (direct webcam resulted in ~3fps, obs virtual cam stable 60fps)
+
 ### AR Game (3D)
