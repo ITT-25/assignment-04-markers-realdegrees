@@ -7,6 +7,7 @@ from frame_transformer import FrameTransformer
 from marker_detection import MarkerDetection
 from camera import Camera
 from config import Config
+from perspective_transformer import PerspectiveTransformer
 
 
 class GameManager(Window):
@@ -19,6 +20,7 @@ class GameManager(Window):
         
         self.camera = Camera(video_id=video_id)
         self.marker_detection = MarkerDetection()
+        self.perspective_transformer = PerspectiveTransformer()
 
         # Init graphics stuff
         self.batch = Batch()
@@ -51,6 +53,11 @@ class GameManager(Window):
             return
                     
         inner_corners, board_center = self.marker_detection.get_board_data(frame)
+        perspective_transformed_frame = None
+        if inner_corners is not None:
+            perspective_transformed_frame = self.perspective_transformer.transform(frame, inner_corners)
+        self.background.image = FrameTransformer.cv2_to_pyglet(perspective_transformed_frame if perspective_transformed_frame is not None else frame)
+
         self.batch.draw()
 
     def on_close(self):
