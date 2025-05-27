@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 import cv2
 import numpy as np
-import pyglet
+from config import Config
 
 COMMON_RESOLUTIONS_ASCENDING = [
     (640, 480),
@@ -29,30 +29,22 @@ class Camera:
                 break
     
 
-    def get_pyglet_frame(self) -> Optional[pyglet.image.ImageData]:
-        """Get current frame in pyglet-compatible format."""
+    def get_frame(self) -> Optional[np.ndarray]:
+        """Get current frame in pyglet-compatible format.
+        
+        Returns: Tuple containing pyglet image and original OpenCV frame (BGR).
+        """
         success, frame = self.cap.read()
         if not success:
             return None
             
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image = self._cv2pyglet(frame)
-        return image
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    def _cv2pyglet(self, img: np.ndarray) -> pyglet.image.ImageData:
-        """Convert OpenCV image to pyglet image."""
-        rows, cols, channels = img.shape
-        bytes_per_row = channels * cols
-        
-        img = pyglet.image.ImageData(
-            width=cols, 
-            height=rows, 
-            fmt="RGB", 
-            data=img.tobytes(), 
-            pitch=-bytes_per_row
-        )
-        return img
-    
+        # Resize the frame to match the window dimensions
+        rgb_frame = cv2.resize(rgb_frame, (Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT))
+
+        return rgb_frame
+
     def get_dimensions(self) -> Tuple[int, int]:
         """Get camera frame dimensions."""
         return (self.width, self.height)

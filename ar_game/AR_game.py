@@ -3,6 +3,7 @@ import click
 import pyglet
 from pyglet.window import Window
 from pyglet.graphics import Batch
+from frame_transformer import FrameTransformer
 from camera import Camera
 from config import Config
 
@@ -43,9 +44,10 @@ class GameManager(Window):
 
     def on_draw(self):
         self.clear()
-        print(self.camera.get_dimensions())
-        self.background.image = self.camera.get_pyglet_frame()
-        self.background.scale = Config.WINDOW_WIDTH / self.camera.get_dimensions()[0]
+        frame = self.camera.get_frame()
+        if frame is None:
+            return
+        self.background.image = FrameTransformer.cv2_to_pyglet(frame)
         self.batch.draw()
 
     def on_close(self):
