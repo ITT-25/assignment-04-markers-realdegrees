@@ -18,6 +18,21 @@ class MarkerDetection:
         distances = np.linalg.norm(marker_corners - board_center, axis=1)
         return marker_corners[np.argmin(distances)]
 
+    def _extrapolate_fourth_corner(self, corners: np.ndarray) -> np.ndarray:
+        """Extrapolate the fourth corner of a rectangle given three corners."""
+        # Find the diagonal (longest distance between corners)
+        distances = np.array([np.linalg.norm(corners[i] - corners[j]) 
+                             for i in range(3) for j in range(i+1, 3)])
+        max_dist_idx = np.argmax(distances)
+        
+        # Convert flat index to corner indices
+        diagonal_pairs = [(i, j) for i in range(3) for j in range(i+1, 3)]
+        diagonal_corners = diagonal_pairs[max_dist_idx]
+        right_angle_corner = next(i for i in range(3) if i not in diagonal_corners)
+        
+        # Fourth point = diagonal_point1 + diagonal_point2 - right_angle_point
+        return corners[diagonal_corners[0]] + corners[diagonal_corners[1]] - corners[right_angle_corner]
+    
     def _get_marker_data(self, frame: np.ndarray, current_time: float) -> list:
         """Get marker data from detection or cache"""
         
@@ -82,4 +97,9 @@ class MarkerDetection:
             for idx in ordered_indices
         ], dtype=np.float32)
         
+        # Extrapolate fourth corner if only 3 markers
+        if len(marker_data) == 3:
+            fourth_corner = self._extrapolate_fourth_corner(inner_corners)
+            inner_corners = np.vstack([inner_corners, fourth_corner])
+            
         return inner_corners, board_center
