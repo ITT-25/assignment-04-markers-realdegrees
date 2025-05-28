@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import pyglet
-from config import Config
+from src.config import Config
 
 
 class FrameTransformer:

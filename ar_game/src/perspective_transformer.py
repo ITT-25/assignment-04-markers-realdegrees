@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from typing import List, Tuple, Optional
-from config import Config
+from src.config import Config
 
 def _order_points(points: List[Tuple[int, int]]) -> Optional[np.ndarray]:
         """Sort 4 points into top-left, top-right, bottom-right, bottom-left."""

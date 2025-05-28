@@ -5,11 +5,11 @@ import cv2
 import pyglet
 from pyglet.window import Window
 from pyglet.graphics import Batch
-from frame_transformer import FrameTransformer
-from marker_detection import MarkerDetection
-from camera import Camera
-from config import Config
-from perspective_transformer import PerspectiveTransformer
+from src.frame_transformer import FrameTransformer
+from src.marker_detection import MarkerDetection
+from src.camera import Camera
+from src.config import Config
+from src.perspective_transformer import PerspectiveTransformer
 
 class GameState(enum.Enum):
     RUNNING = ""

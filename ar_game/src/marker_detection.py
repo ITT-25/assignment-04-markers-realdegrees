@@ -4,7 +4,7 @@ import cv2.aruco as aruco
 import numpy as np
 import time
 from typing import Tuple, Optional, Dict
-from config import Config
+from src.config import Config
 
 
 class MarkerDetection:

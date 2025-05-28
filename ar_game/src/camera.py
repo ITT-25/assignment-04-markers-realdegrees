@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 import cv2
 import numpy as np
-from config import Config
+from src.config import Config
 
 COMMON_RESOLUTIONS_ASCENDING = [(640, 480), (800, 600), (1024, 768), (1280, 720), (1920, 1080)]
 
