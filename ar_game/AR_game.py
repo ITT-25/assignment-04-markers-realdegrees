@@ -44,18 +44,15 @@ class GameManager(Window):
 
         # ! Background drawn manually, not included in batch
         self.background = pyglet.shapes.Rectangle(
-            0,
-            0,
-            Config.WINDOW_WIDTH,
-            Config.WINDOW_HEIGHT,
+            0, 0, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT,
             color=(255, 255, 255),
         )
-        self.frame = pyglet.sprite.Sprite(
-            pyglet.image.Texture.create(
-                width=Config.WINDOW_WIDTH,
-                height=Config.WINDOW_HEIGHT,
-            ),
+        # Create a persistent texture and sprite for the video frame
+        self.frame_texture = pyglet.image.Texture.create(
+            width=Config.WINDOW_WIDTH,
+            height=Config.WINDOW_HEIGHT,
         )
+        self.frame = pyglet.sprite.Sprite(self.frame_texture)
 
         # ! State label drawn manually, not included in batch
         self.game_state_label = pyglet.text.Label(
@@ -87,17 +84,20 @@ class GameManager(Window):
         # Transform game board perspective to screen space, apply modifiers and postprocessing
         perspective_transformed_frame = None
         if inner_corners is not None:
-            perspective_transformed_frame = PerspectiveTransformer.transform(frame, inner_corners)
+            perspective_transformed_frame = PerspectiveTransformer.transform(
+                frame, inner_corners)
             if perspective_transformed_frame is not None:
                 perspective_transformed_frame = cv2.flip(perspective_transformed_frame, 1)
 
                 # Object detection
-                high, low = self.object_detection.detect_object(perspective_transformed_frame)
+                high, low = self.object_detection.detect_object(
+                    perspective_transformed_frame)
                 self.handle_sword(high, low)
 
-        # Update background image
-        self.frame.image = FrameTransformer.cv2_to_pyglet(
-            perspective_transformed_frame if perspective_transformed_frame is not None else frame
+        image_data = FrameTransformer.cv2_to_pyglet(perspective_transformed_frame if perspective_transformed_frame is not None else frame)
+        self.frame_texture.blit_into(
+            image_data,
+            0, 0, 0
         )
 
         # Adjust game state
