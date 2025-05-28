@@ -1,19 +1,202 @@
 import math
+from collections import deque
+from typing import Deque, List
+import pyglet
 from pyglet.graphics import Batch
+from src.config import Config
 from src.image_loader import ImageLoader
+from src.vector_2d import Vector2D
+import random
+
+class GameObject(pyglet.sprite.Sprite):
+    velocity: Vector2D = Vector2D(0.0, 0.0)
+    angular_velocity: float = 0.0
+    off_screen: bool = False  # Mark for deletion if off-screen
+    points: int
+
+    def __init__(self, sprite: pyglet.sprite.Sprite, x: float = 0.0, y: float = 0.0, points: int = 0):
+        super().__init__(sprite.image, x=x, y=y)
+        self.rotation = sprite.rotation
+        self.scale = sprite.scale
+        self.points = points
+
+    def physics_update(self, dt: float):
+        """Update the position of the game object based on its velocity. Delete if off-screen."""
+        # Apply linear drag
+        self.velocity.x *= 1 - Config.LINEAR_DRAG
+
+        # Apply gravity (downward force)
+        self.velocity.y -= Config.GRAVITY * dt
+
+        # Update position based on velocity
+        self.x += self.velocity.x * dt
+        self.y += self.velocity.y * dt
+        
+        # Apply angular drag
+        self.angular_velocity *= 1 - Config.ANGULAR_DRAG
+        self.rotation += self.angular_velocity * dt
+
+        # Mark for deletion if completely off-screen (Ignore top off-screen)
+        if Config.WINDOW_WIDTH is not None and Config.WINDOW_HEIGHT is not None:
+            if (self.x + self.width < 0 or self.x > Config.WINDOW_WIDTH + self.width or
+                self.y + self.height < 0):
+                print(f"Object at ({self.x}, {self.y}) marked for deletion")
+                self.off_screen = True
 
 class GameManager:
+    gameobjects: list[GameObject] = []
+    sword: GameObject
+    point_labels: Deque[pyglet.text.Label] = deque(maxlen=10)
+    points: int = 0
+    spawning_enabled: bool = True
+    _spawn_cooldown: float = Config.FRUIT_INTERVAL
+    _last_spawn_time: float = 0.0
+    _min_fruits: int = 10
+    
     def __init__(self, batch: Batch):
         self.batch = batch
-        self.sword = ImageLoader().get_sprite("sword.png", rotation=45, scale=1.2)
+        self.sword = GameObject(ImageLoader().get_sprite("sword.png", rotation=45, scale=1.2))
         self.sword.batch = self.batch
         self.sword.visible = False
 
-    def update(self, dt: float):
+        self.fruit_names = [
+            "apple.png", "banana.png", "cherry.png", "grape.png", "kiwi.png", "lemon.png", "orange.png", "peach.png", "pear.png", "pineapple.png", "strawberry.png", "watermelon.png"
+        ]
+
+    def spawn_gameobject(self):
+        spawn_bomb = random.random() < Config.BOMB_CHANCE
+        
+        if spawn_bomb:
+            # Pick a random bomb image
+            sprite = ImageLoader().get_sprite("bomb.png", scale=random.uniform(0.7, 1.2))
+            gameobject = GameObject(sprite, y=random.uniform(Config.WINDOW_HEIGHT * 0.2, Config.WINDOW_HEIGHT * 0.45), points=Config.BOMB_POINTS)
+
+        else:
+            # Pick a random fruit image
+            fruit_name = random.choice(self.fruit_names)
+            sprite = ImageLoader().get_sprite(fruit_name, scale=random.uniform(0.7, 1.2))
+            gameobject = GameObject(sprite, y=random.uniform(Config.WINDOW_HEIGHT * 0.2, Config.WINDOW_HEIGHT * 0.45), points=Config.FRUIT_POINTS)
+
+        # Choose left or right
+        side = random.choice(["left", "right"])
+        gameobject.y = random.uniform(Config.WINDOW_HEIGHT * 0.2, Config.WINDOW_HEIGHT * 0.5)
+        gameobject.x = -gameobject.width if side == "left" else Config.WINDOW_WIDTH + gameobject.width  # off-screen left or right
+  
+        # Random upward angle offset
+        angle_offset = random.uniform(25, 40)
+        angle_rad = math.radians(angle_offset)
+        
+        # Random speed
+        speed_range = Config.get_fruit_speed_range()
+        speed = random.uniform(speed_range[0], speed_range[1])
+        direction = 1 if side == "left" else -1
+        vx = direction * speed * math.cos(angle_rad)
+        vy = speed * math.sin(angle_rad)
+        gameobject.velocity = Vector2D(vx, vy)
+
+        # Random angular velocity
+        angular_velocity = random.uniform(160, 360) * random.choice([-1, 1])
+        gameobject.angular_velocity = angular_velocity
+        gameobject.batch = self.batch
+        self.gameobjects.append(gameobject)
+
+    def set_spawning_enabled(self, enabled: bool):
+        self.spawning_enabled = enabled
+
+    def update(self, dt: float, high: tuple[float, float] = None, low: tuple[float, float] = None):
         """Update the game state."""
-        pass
     
-    def update_sword(self, high: tuple[float, float] = None, low: tuple[float, float] = None):
+        # Spawn fruits if needed
+        import time
+        now = time.time()
+        if self.spawning_enabled and len(self.gameobjects) < self._min_fruits:
+            if now - self._last_spawn_time > self._spawn_cooldown:
+                self.spawn_gameobject()
+                self._last_spawn_time = now
+                self._spawn_cooldown = random.uniform(Config.FRUIT_INTERVAL * 0.4, Config.FRUIT_INTERVAL * 1.2)  # Randomize spawn interval
+
+        # Update sword
+        self._update_sword(high, low)
+
+        # Update fruits
+        for fruit in self.gameobjects:
+            fruit.physics_update(dt)
+        
+        self.check_collisions()
+        
+        # Remove off-screen or deleted objects immediately after collision check
+        # Split objects into those on-screen and those off-screen
+        on_screen_objects: List[GameObject] = []
+        off_screen_objects: List[GameObject] = []
+        
+        for obj in self.gameobjects:
+            if obj.off_screen:
+                off_screen_objects.append(obj)
+            else:
+                on_screen_objects.append(obj)
+        
+        # Update our game objects list to only contain on-screen objects
+        self.gameobjects = on_screen_objects
+        
+        for obj in off_screen_objects:
+            if obj.points > 0:
+                subtract_points = obj.points // 2
+                self.points -= subtract_points
+                label = pyglet.text.Label(
+                        f"-{subtract_points}",
+                        font_name='Arial',
+                        font_size=42,
+                        x=min(max(0, obj.x), Config.WINDOW_WIDTH),
+                        y=min(max(0, obj.y), Config.WINDOW_HEIGHT),
+                        anchor_x='center',
+                        anchor_y='center',
+                        color=(255, 0, 0, 255),
+                        batch=self.batch
+                    )
+                label.x += label.content_width // 2  * (-1 if obj.x > 0 else 1) * 1.2
+                label.y += label.content_height // 2 * (-1 if obj.y > 0 else 1) * 1.2
+                self.point_labels.append(label)
+            obj.delete()
+        
+        for label in self.point_labels:
+            label.opacity -= dt * 255 / 4  # Fade out labels
+            label.opacity = max(0, label.opacity)  # Ensure opacity doesn't go below 0
+        
+        
+    def check_collisions(self):
+        """Check for collisions between the sword and game objects."""
+        for obj in self.gameobjects:
+            if obj.off_screen:
+                continue
+            
+            colliding = (
+                self.sword.x < obj.x + obj.width and
+                self.sword.x + self.sword.width > obj.x and
+                self.sword.y < obj.y + obj.height and
+                self.sword.y + self.sword.height > obj.y
+            )
+            # Check if the sword intersects with the fruit
+            if self.sword.visible and colliding:
+                # Collision detected, handle it
+                self.points += obj.points
+                self.point_labels.append(
+                    pyglet.text.Label(
+                        f"{'+' if obj.points > 0 else ''}{obj.points}",
+                        font_name='Arial',
+                        font_size=52,
+                        x=obj.x,
+                        y=obj.y,
+                        anchor_x='center',
+                        anchor_y='center',
+                        color=(0, 255, 0, 255) if obj.points > 0 else (255, 0, 0, 255),
+                        batch=self.batch
+                    )
+                )
+                self.gameobjects.remove(obj)
+                obj.delete()
+
+
+    def _update_sword(self, high: tuple[float, float] = None, low: tuple[float, float] = None):
         """Set the visibility, position, and rotation of the sword based on high and low coordinates."""
         if high is not None and low is not None:
             # Handle sword positioning and rotation
@@ -45,4 +228,3 @@ class GameManager:
             self.sword.rotation = self.sword.rotation + angle_diff * rotation_lerp_factor
         else:
             self.sword.visible = False
-

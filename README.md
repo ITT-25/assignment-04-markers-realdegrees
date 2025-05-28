@@ -35,6 +35,7 @@ features:
 Asset Sources: 
 - https://catdev-pixelarts.itch.io/catdevs-exotics-swords
 - https://jennpixel.itch.io/fruits-pack-12
+- https://ahninniah.itch.io/free-game-items-pack-2
 
 TODO: Write disclaimer about webcam performance (direct webcam resulted in ~3fps, obs virtual cam stable 60fps)
 

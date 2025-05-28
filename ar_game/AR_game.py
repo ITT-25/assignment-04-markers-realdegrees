@@ -87,6 +87,7 @@ class GameWindow(Window):
 
         # Transform game board perspective to screen space, apply modifiers and postprocessing
         perspective_transformed_frame = None
+        high, low = None, None
         if inner_corners is not None:
             perspective_transformed_frame = PerspectiveTransformer.transform(
                 frame, inner_corners)
@@ -96,7 +97,7 @@ class GameWindow(Window):
                 # Object detection
                 high, low = self.object_detection.detect_object(
                     perspective_transformed_frame)
-                self.game_manager.update_sword(high, low)
+                self.game_manager._update_sword(high, low)
 
         image_data = FrameTransformer.cv2_to_pyglet(perspective_transformed_frame if perspective_transformed_frame is not None else frame)
         self.frame_texture.blit_into(
@@ -105,13 +106,15 @@ class GameWindow(Window):
         )
 
         # Adjust game state
-        new_game_state = GameState.RUNNING if perspective_transformed_frame is not None else GameState.SEARCHING_AREA
-        self.handle_game_state(dt, new_game_state)
-        self.game_manager.update(dt)
+        desired_game_state = GameState.RUNNING if perspective_transformed_frame is not None else GameState.SEARCHING_AREA
+        self.update_game_state(dt, desired_game_state)
+        
+        if self.game_state == GameState.RUNNING:
+            self.game_manager.update(dt, high, low)
 
     
 
-    def handle_game_state(self, dt: float, new_game_state: GameState):
+    def update_game_state(self, dt: float, new_game_state: GameState):
         # Update game state based on whether we can see the board
 
         # Handle state transitions
