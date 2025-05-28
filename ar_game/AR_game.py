@@ -5,6 +5,7 @@ import cv2
 import pyglet
 from pyglet.window import Window
 from pyglet.graphics import Batch
+from src.sword_loader import SwordLoader
 from src.frame_transformer import FrameTransformer
 from src.marker_detection import MarkerDetection
 from src.camera import Camera
@@ -33,6 +34,11 @@ class GameManager(Window):
 
         # Init graphics stuff
         self.batch = Batch()
+        
+        self.sword = SwordLoader().get_sword_sprite()
+        self.sword.batch = self.batch
+        self.sword.visible = False
+
         # ! Background drawn manually, not included in batch
         self.background = pyglet.sprite.Sprite(
             pyglet.image.Texture.create(
