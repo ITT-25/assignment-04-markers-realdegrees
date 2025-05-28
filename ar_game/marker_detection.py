@@ -3,7 +3,7 @@ import cv2
 import cv2.aruco as aruco
 import numpy as np
 import time
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Dict
 from config import Config
 
 
@@ -11,13 +11,22 @@ class MarkerDetection:
     def __init__(self, dictionary_type: int = aruco.DICT_6X6_250):
         self.aruco_dict = aruco.getPredefinedDictionary(dictionary_type)
         self.detector = aruco.ArucoDetector(self.aruco_dict, aruco.DetectorParameters())
-        self.marker_cache = {}  # {id: (corners, timestamp)}
+        self.marker_cache: Dict[int, Tuple[np.ndarray, float]] = {}
         self.cache_timeout = 1
 
     def get_inner_corner(self, marker_corners: np.ndarray, board_center: np.ndarray) -> np.ndarray:
         """Get the inner corner of a marker (closest to board center)"""
         distances = np.linalg.norm(marker_corners - board_center, axis=1)
         return marker_corners[np.argmin(distances)]
+    
+    def get_cached_marker_count(self) -> int:
+        """Get the count of recent cached markers."""
+        current_time = time.time()
+        
+        # Count only markers that haven't timed out
+        recent_markers = [marker_id for marker_id, (_, timestamp) in self.marker_cache.items() 
+                          if current_time - timestamp < 5 / Config.UPDATE_RATE]
+        return len(recent_markers)
 
     def _extrapolate_fourth_corner(self, corners: np.ndarray) -> np.ndarray:
         """Extrapolate the fourth corner of a rectangle given three corners."""

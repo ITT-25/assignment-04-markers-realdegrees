@@ -2,6 +2,7 @@ class Config:
     WINDOW_WIDTH: int = 800
     WINDOW_HEIGHT: int = 550
     DEBUG: bool = False
+    RESUME_DURATION: float = 3
 
     # Old
     COLUMN_GAP: int = 10
