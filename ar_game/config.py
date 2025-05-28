@@ -2,7 +2,7 @@ class Config:
     WINDOW_WIDTH: int = 800
     WINDOW_HEIGHT: int = 550
     DEBUG: bool = False
-    
+
     # Old
     COLUMN_GAP: int = 10
     IMAGE_ANIMATION_INTERVAL: float = 0.5

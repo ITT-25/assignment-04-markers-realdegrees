@@ -3,22 +3,26 @@ import numpy as np
 from typing import List, Tuple, Optional
 from config import Config
 
+
 class PerspectiveTransformer:
     def transform(self, frame: np.ndarray, points: List[Tuple[int, int]]) -> Optional[np.ndarray]:
         """Transform the perspective of the frame based on selected points"""
         if len(points) != 4 or frame is None:
             return None
-        
+
         # Order the points for consistent transformation
         ordered_points = self._order_points(points)
         if ordered_points is None:
             return None
-        dst_pts = np.array([
-            [0, 0],
-            [Config.WINDOW_WIDTH - 1, 0],
-            [Config.WINDOW_WIDTH - 1, Config.WINDOW_HEIGHT - 1],
-            [0, Config.WINDOW_HEIGHT - 1]
-        ], dtype=np.float32)
+        dst_pts = np.array(
+            [
+                [0, 0],
+                [Config.WINDOW_WIDTH - 1, 0],
+                [Config.WINDOW_WIDTH - 1, Config.WINDOW_HEIGHT - 1],
+                [0, Config.WINDOW_HEIGHT - 1],
+            ],
+            dtype=np.float32,
+        )
         matrix = cv2.getPerspectiveTransform(ordered_points, dst_pts)
         return cv2.warpPerspective(frame, matrix, (Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT))
 
