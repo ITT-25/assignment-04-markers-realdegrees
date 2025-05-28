@@ -1,5 +1,6 @@
 # Main entry point for AR game
 import enum
+import math
 import click
 import cv2
 import pyglet
@@ -11,6 +12,7 @@ from src.marker_detection import MarkerDetection
 from src.camera import Camera
 from src.config import Config
 from src.perspective_transformer import PerspectiveTransformer
+from src.object_detection import ObjectDetection 
 
 class GameState(enum.Enum):
     RUNNING = ""
@@ -31,6 +33,7 @@ class GameManager(Window):
         self.mirror = mirror
         self.camera = Camera(video_id=video_id)
         self.marker_detection = MarkerDetection(board_ids)
+        self.object_detection = ObjectDetection()
 
         # Init graphics stuff
         self.batch = Batch()
@@ -47,6 +50,7 @@ class GameManager(Window):
             ),
         )
         
+        # ! State label drawn manually, not included in batch
         self.game_state_label = pyglet.text.Label(
             "",
             font_name="Arial",
@@ -55,6 +59,9 @@ class GameManager(Window):
             color=(255, 255, 255, 255),
             anchor_x="center", anchor_y="bottom",
         )
+    
+        
+        
 
         # TODO: Initialize object detection module that detects objects in the game area and returns their positions or provides a way to check if a specific position is occupied
         # TODO: Initialize game logic module that uses the object detection module to allow interaction with game objects (e.g. hand could push or pickup a ball)
@@ -79,8 +86,11 @@ class GameManager(Window):
                 if self.mirror:
                     perspective_transformed_frame = cv2.flip(perspective_transformed_frame, 1)
                 
-                perspective_transformed_frame = FrameTransformer.postprocess_frame(perspective_transformed_frame)
-        
+                # Object detection
+                high, low = self.object_detection.detect_object(perspective_transformed_frame)
+                self.handle_sword(high, low)
+                
+
         # Update background image
         self.background.image = FrameTransformer.cv2_to_pyglet(
             perspective_transformed_frame if perspective_transformed_frame is not None else frame
@@ -90,7 +100,38 @@ class GameManager(Window):
         new_game_state = GameState.RUNNING if perspective_transformed_frame is not None else GameState.SEARCHING_AREA
         self.handle_game_state(dt, new_game_state)
         
-
+    def handle_sword(self, high: tuple[float, float] = None, low: tuple[float, float] = None):
+        if high is not None and low is not None:
+            # Handle sword positioning and rotation
+            self.sword.visible = True
+            
+            # Calculate rotation angle based on direction from low to high
+            dx = high[0] - low[0]
+            dy = high[1] - low[1]
+            
+            # Calculate rotation angle in degrees from the vector direction
+            angle = 90  # Base angle adjustment for the sword image
+            if dx == 0:
+                angle += 180 if dy < 0 else 0
+            else:
+                angle_rad = math.atan2(dy, dx)
+                angle -= math.degrees(angle_rad)
+            
+            # Lerp position with higher factor for smoother movement
+            position_lerp_factor = 0.8
+            self.sword.x = self.sword.x + (high[0] - self.sword.x) * position_lerp_factor
+            self.sword.y = self.sword.y + (high[1] - self.sword.y) * position_lerp_factor
+            
+            # Lerp rotation with slightly lower factor for smoother rotation
+            rotation_lerp_factor = 0.6
+            angle_diff = (angle - self.sword.rotation) % 360
+            if angle_diff > 180:
+                angle_diff -= 360
+            
+            self.sword.rotation = self.sword.rotation + angle_diff * rotation_lerp_factor
+        else:
+            self.sword.visible = False
+            
     def handle_game_state(self, dt:float, new_game_state: GameState):
         # Update game state based on whether we can see the board
         
