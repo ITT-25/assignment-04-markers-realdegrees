@@ -1,11 +1,11 @@
 import math
 from pyglet.graphics import Batch
-from src.sword_loader import SwordLoader
+from src.image_loader import ImageLoader
 
 class GameManager:
     def __init__(self, batch: Batch):
         self.batch = batch
-        self.sword = SwordLoader().get_sword_sprite()
+        self.sword = ImageLoader().get_sprite("sword.png", rotation=45, scale=1.2)
         self.sword.batch = self.batch
         self.sword.visible = False
 
