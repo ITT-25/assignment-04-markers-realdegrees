@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import pyglet
-from src.config import Config
 
 
 class FrameTransformer:
@@ -16,25 +15,7 @@ class FrameTransformer:
     def postprocess_frame(frame: np.ndarray) -> np.ndarray:
         """Cleanup the final frame before rendering"""
         # Increase Brightness
-        brightened = cv2.convertScaleAbs(frame, alpha=1.2, beta=30)
+        brightened = cv2.convertScaleAbs(frame, alpha=1.1, beta=25)
 
-        # Sharpen the image to enhance details
-        sharpen_kernel = np.array([[0, -1, 0],
-                                   [-1, 6.5, -1],
-                                   [0, -1, 0]])
-
-        sharpened = cv2.filter2D(brightened, -1, sharpen_kernel)
-        
-        # Remove noise
-        denoised = cv2.medianBlur(sharpened, 3)
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
-        closed = cv2.morphologyEx(denoised, cv2.MORPH_CLOSE, kernel)
-        
-        
-
-        if Config.DEBUG:
-            cv2.imshow("Postprocessed Frame", closed)
-            cv2.imshow("Original Frame", frame)
-
-        return closed
+        return brightened
 
