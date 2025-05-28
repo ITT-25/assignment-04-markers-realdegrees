@@ -36,10 +36,11 @@ class GameManager(Window):
         self.object_detection = ObjectDetection()
 
         # Init graphics stuff
-        self.batch = Batch()
+        self.gameobject_batch = Batch()
+        self.game_state_batch = Batch()
 
         self.sword = SwordLoader().get_sword_sprite()
-        self.sword.batch = self.batch
+        self.sword.batch = self.gameobject_batch
         self.sword.visible = False
 
         # ! Background drawn manually, not included in batch
@@ -64,7 +65,15 @@ class GameManager(Window):
             color=(15, 15, 15, 255),
             anchor_x="center",
             anchor_y="bottom",
+            batch=self.game_state_batch
         )
+        self.game_state_background = pyglet.shapes.Rectangle(
+            Config.WINDOW_WIDTH // 2, 45, Config.WINDOW_WIDTH, int(self.game_state_label.font_size * 2),
+            color=(255, 255, 255),
+            batch=self.game_state_batch
+        )
+        self.game_state_background.anchor_x = self.game_state_background.width // 2
+        self.game_state_background.anchor_y = 0
 
         # TODO: Initialize object detection module that detects objects in the game area and returns their positions or provides a way to check if a specific position is occupied
         # TODO: Initialize game logic module that uses the object detection module to allow interaction with game objects (e.g. hand could push or pickup a ball)
@@ -177,9 +186,10 @@ class GameManager(Window):
                 if self.game_state == GameState.SEARCHING_AREA
                 else self.game_state.value.format(self.resume_time)
             )
-            self.game_state_label.draw()
+            self
+            self.game_state_batch.draw()
         else:
-            self.batch.draw()
+            self.gameobject_batch.draw()
 
     def on_close(self):
         self.camera.release()

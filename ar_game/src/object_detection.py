@@ -19,7 +19,7 @@ class ObjectDetection:
         """
         # Background subtractor
         self.bg_subtractor = cv2.createBackgroundSubtractorMOG2(
-            history=Config.UPDATE_RATE * 2, varThreshold=20, detectShadows=False
+            history=Config.UPDATE_RATE * 2, varThreshold=Config.CONTOUR_SENSITIVITY, detectShadows=False
         )
 
         # Kernel for morphological operations

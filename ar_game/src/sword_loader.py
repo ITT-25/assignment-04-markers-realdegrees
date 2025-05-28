@@ -38,7 +38,7 @@ class SwordLoader:
 
         self.sword_image = sword_pyglet_image
         self.sword_sprite = pyglet.sprite.Sprite(sword_pyglet_image)
-        self.sword_sprite.scale = 10
+        self.sword_sprite.scale = 1.2
 
     def get_sword_image(self):
         """Return the sword image."""
