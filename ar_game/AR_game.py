@@ -29,7 +29,6 @@ class GameManager(Window):
         self.mirror = mirror
         self.camera = Camera(video_id=video_id)
         self.marker_detection = MarkerDetection()
-        self.perspective_transformer = PerspectiveTransformer()
 
         # Init graphics stuff
         self.batch = Batch()
@@ -50,8 +49,6 @@ class GameManager(Window):
             anchor_x="center", anchor_y="bottom",
         )
 
-        # TODO: Initialize marker detection module that detects markers in the camera feed and returns their positions, orientations and ids
-        # TODO: Initialize game area module that transforms the area between the inner corners of the markers to the window size and returns it as a pyglet compatible image
         # TODO: Initialize object detection module that detects objects in the game area and returns their positions or provides a way to check if a specific position is occupied
         # TODO: Initialize game logic module that uses the object detection module to allow interaction with game objects (e.g. hand could push or pickup a ball)
 
@@ -64,24 +61,38 @@ class GameManager(Window):
         if frame is None:
             return
 
+        # Get board data from raw frame
         inner_corners, board_center = self.marker_detection.get_board_data(frame)
+        
+        # Transform game board perspective to screen space, apply modifiers and postprocessing
         perspective_transformed_frame = None
-        
         if inner_corners is not None:
-            perspective_transformed_frame = self.perspective_transformer.transform(frame, inner_corners)
-            if self.mirror and perspective_transformed_frame is not None:
-                perspective_transformed_frame = cv2.flip(perspective_transformed_frame, 1)
-            
+            perspective_transformed_frame = PerspectiveTransformer.transform(frame, inner_corners)
+            if perspective_transformed_frame is not None:
+                if self.mirror:
+                    perspective_transformed_frame = cv2.flip(perspective_transformed_frame, 1)
+                
+                perspective_transformed_frame = FrameTransformer.postprocess_frame(perspective_transformed_frame)
         
-        # Update game state based on whether we can see the board
+        # Update background image
+        self.background.image = FrameTransformer.cv2_to_pyglet(
+            perspective_transformed_frame if perspective_transformed_frame is not None else frame
+        )
+        
+        # Adjust game state
         new_game_state = GameState.RUNNING if perspective_transformed_frame is not None else GameState.SEARCHING_AREA
+        self.handle_game_state(dt, new_game_state)
+        
+
+    def handle_game_state(self, dt:float, new_game_state: GameState):
+        # Update game state based on whether we can see the board
         
         # Handle state transitions
         if self.game_state == GameState.SEARCHING_AREA and new_game_state == GameState.RUNNING:
             # Start resuming countdown when board is found
             self.game_state = GameState.RESUMING
         elif self.game_state == GameState.RESUMING:
-            # If board lost while resuming, go back to searching
+            # If board is lost while resuming, go back to searching
             if new_game_state == GameState.SEARCHING_AREA:
                 self.game_state = GameState.SEARCHING_AREA
                 self.resume_time = Config.RESUME_DURATION
@@ -91,20 +102,15 @@ class GameManager(Window):
             else:
                 self.resume_time -= dt
         elif self.game_state == GameState.RUNNING and new_game_state == GameState.SEARCHING_AREA:
-            # If we lose the board while running, go back to searching
+            # If board is lost while running, go back to searching
             self.game_state = GameState.SEARCHING_AREA
             self.resume_time = Config.RESUME_DURATION
-
-        self.background.image = FrameTransformer.cv2_to_pyglet(
-            perspective_transformed_frame if perspective_transformed_frame is not None else frame
-        )
         
-        print(f"Game state: {self.game_state}, Resume time: {self.resume_time:.1f}")
-
     def on_draw(self):
         self.clear()
         self.background.draw()
         
+        # Draw the game state label or the batch depending on the current game state
         if self.game_state == GameState.SEARCHING_AREA:
             self.game_state_label.text = self.game_state.value.format(self.marker_detection.get_cached_marker_count())
             self.game_state_label.draw()
