@@ -19,14 +19,17 @@ class MarkerDetection:
         """Get the inner corner of a marker (closest to board center)"""
         distances = np.linalg.norm(marker_corners - board_center, axis=1)
         return marker_corners[np.argmin(distances)]
-    
+
     def get_cached_marker_count(self) -> int:
         """Get the count of recent cached markers."""
         current_time = time.time()
-        
+
         # Count only markers that haven't timed out
-        recent_markers = [marker_id for marker_id, (_, timestamp) in self.marker_cache.items() 
-                          if current_time - timestamp < 5 / Config.UPDATE_RATE]
+        recent_markers = [
+            marker_id
+            for marker_id, (_, timestamp) in self.marker_cache.items()
+            if current_time - timestamp < 5 / Config.UPDATE_RATE
+        ]
         return len(recent_markers)
 
     def _extrapolate_fourth_corner(self, corners: np.ndarray) -> np.ndarray:
