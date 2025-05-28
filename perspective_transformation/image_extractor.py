@@ -177,10 +177,10 @@ class ImageTransformer:
 @click.option("--input", "-i", required=True, type=click.Path(exists=True), help="Path to input image.")
 @click.option("--output", "-o", required=True, type=click.Path(), help="Path to save the warped image.")
 @click.option(
-    "--width", "-w", required=False, default=1200, type=int, help="Width of the output image. (Default: 1200)"
+    "--width", "-w", required=False, default=1200, type=int, help="Width of the output image", show_default=True
 )
 @click.option(
-    "--height", "-h", required=False, default=800, type=int, help="Height of the output image. (Default: 800)"
+    "--height", "-h", required=False, default=800, type=int, help="Height of the output image", show_default=True
 )
 def main(input: str, output: str, width: int, height: int) -> None:
     """Extract and transform a region from an image using perspective transformation."""

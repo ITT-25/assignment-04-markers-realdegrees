@@ -8,11 +8,12 @@ from config import Config
 
 
 class MarkerDetection:
-    def __init__(self, dictionary_type: int = aruco.DICT_6X6_250):
+    def __init__(self, board_ids: list[int], *, dictionary_type: int = aruco.DICT_6X6_250):
         self.aruco_dict = aruco.getPredefinedDictionary(dictionary_type)
         self.detector = aruco.ArucoDetector(self.aruco_dict, aruco.DetectorParameters())
         self.marker_cache: Dict[int, Tuple[np.ndarray, float]] = {}
         self.cache_timeout = 1
+        self.board_ids = board_ids
 
     def get_inner_corner(self, marker_corners: np.ndarray, board_center: np.ndarray) -> np.ndarray:
         """Get the inner corner of a marker (closest to board center)"""
@@ -43,7 +44,8 @@ class MarkerDetection:
         return corners[diagonal_corners[0]] + corners[diagonal_corners[1]] - corners[right_angle_corner]
 
     def _get_marker_data(self, frame: np.ndarray, current_time: float) -> list:
-        """Get marker data from detection or cache"""
+        """Get marker data from detection or cache, limited to allowed marker IDs"""
+        board_ids = self.board_ids
 
         # Detect markers
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -57,25 +59,30 @@ class MarkerDetection:
         if marker_ids is not None:
             for i, marker in enumerate(detected_markers):
                 marker_id = int(marker_ids[i][0])
-                marker_corners = marker[0]
-                self.marker_cache[marker_id] = (marker_corners, current_time)
+                if marker_id in board_ids:
+                    marker_corners = marker[0]
+                    self.marker_cache[marker_id] = (marker_corners, current_time)
 
         # Try to use detected markers first (if enough)
-        if marker_ids is not None and len(detected_markers) >= 3:
-            marker_data = []
-            for marker in detected_markers:
-                corners = marker[0]
-                center = np.mean(corners, axis=0)
-                marker_data.append((center, corners))
-            return marker_data
+        marker_data = []
+        if marker_ids is not None:
+            for i, marker in enumerate(detected_markers):
+                marker_id = int(marker_ids[i][0])
+                if marker_id in board_ids:
+                    corners = marker[0]
+                    center = np.mean(corners, axis=0)
+                    marker_data.append((center, corners))
+            if len(marker_data) >= 3:
+                return marker_data
 
         # Fall back to cached markers if not enough fresh detections
         cached_marker_data = []
         for marker_id, (cached_corners, timestamp) in self.marker_cache.items():
-            # Only use recent cached markers
-            if current_time - timestamp < self.cache_timeout:
-                center = np.mean(cached_corners, axis=0)
-                cached_marker_data.append((center, cached_corners))
+            if marker_id in board_ids:
+                # Only use recent cached markers
+                if current_time - timestamp < self.cache_timeout:
+                    center = np.mean(cached_corners, axis=0)
+                    cached_marker_data.append((center, cached_corners))
 
         # Return cached data only if we have enough markers
         return cached_marker_data if len(cached_marker_data) >= 3 else []

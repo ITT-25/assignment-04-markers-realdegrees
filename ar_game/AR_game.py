@@ -24,11 +24,12 @@ class GameManager(Window):
         self,
         video_id: int,
         mirror: bool,
+        board_ids=None,
     ):
         super().__init__(Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT, "Fitness Trainer")
         self.mirror = mirror
         self.camera = Camera(video_id=video_id)
-        self.marker_detection = MarkerDetection()
+        self.marker_detection = MarkerDetection(board_ids)
 
         # Init graphics stuff
         self.batch = Batch()
@@ -62,7 +63,7 @@ class GameManager(Window):
             return
 
         # Get board data from raw frame
-        inner_corners, board_center = self.marker_detection.get_board_data(frame)
+        inner_corners, _ = self.marker_detection.get_board_data(frame)
         
         # Transform game board perspective to screen space, apply modifiers and postprocessing
         perspective_transformed_frame = None
@@ -131,14 +132,23 @@ class GameManager(Window):
 @click.option("--width", default=1920, type=int, help="Width of the application window")
 @click.option("--height", default=1080, type=int, help="Height of the application window")
 @click.option("--debug", is_flag=True, help="Enable debug mode")
-def main(video_id: int, mirror: bool, width: int, height: int, debug: bool) -> None:
+@click.option(
+    "--board-ids",
+    default="0,1,2,3",
+    show_default=True,
+    help="Comma-separated list of marker IDs that are reserved for the game board",
+)
+def main(video_id: int, mirror: bool, width: int, height: int, debug: bool, board_ids: str) -> None:
     """Start the AR board game with the given configuration"""
 
     Config.WINDOW_WIDTH = width
     Config.WINDOW_HEIGHT = height
     Config.DEBUG = debug
 
-    GameManager(video_id=video_id, mirror=mirror)
+    # Parse board_ids string into a list of ints
+    board_ids_list = [int(x) for x in board_ids.split(",") if x.strip().isdigit()]
+
+    GameManager(video_id=video_id, mirror=mirror, board_ids=board_ids_list)
 
 
 if __name__ == "__main__":

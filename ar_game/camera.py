@@ -32,12 +32,10 @@ class Camera:
         if not success:
             return None
 
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
         # Resize the frame to match the window dimensions
-        rgb_frame = cv2.resize(rgb_frame, (Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT))
+        frame = cv2.resize(frame, (Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT))
 
-        return rgb_frame
+        return frame
 
     def get_dimensions(self) -> Tuple[int, int]:
         """Get camera frame dimensions."""
