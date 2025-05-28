@@ -32,7 +32,9 @@ features:
     - fingertip position is at the highest point
     - fingertip rotation is based on vector from lowest to highest point
 
-Asset Source: https://catdev-pixelarts.itch.io/catdevs-exotics-swords
+Asset Sources: 
+- https://catdev-pixelarts.itch.io/catdevs-exotics-swords
+- https://jennpixel.itch.io/fruits-pack-12
 
 TODO: Write disclaimer about webcam performance (direct webcam resulted in ~3fps, obs virtual cam stable 60fps)
 
