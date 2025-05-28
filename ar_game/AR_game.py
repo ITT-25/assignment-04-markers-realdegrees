@@ -1,12 +1,11 @@
 # Main entry point for AR game
 import enum
-import math
 import click
 import cv2
 import pyglet
 from pyglet.window import Window
 from pyglet.graphics import Batch
-from src.sword_loader import SwordLoader
+from src.game_manager import GameManager
 from src.frame_transformer import FrameTransformer
 from src.marker_detection import MarkerDetection
 from src.camera import Camera
@@ -21,7 +20,7 @@ class GameState(enum.Enum):
     RESUMING = "Resuming in {:.1f} seconds..."
 
 
-class GameManager(Window):
+class GameWindow(Window):
     game_state: GameState = GameState.SEARCHING_AREA
     resume_time: float = 0.0
 
@@ -36,12 +35,11 @@ class GameManager(Window):
         self.object_detection = ObjectDetection()
 
         # Init graphics stuff
-        self.gameobject_batch = Batch()
+        self.game_batch = Batch()
+        self.ui_batch = Batch()
         self.game_state_batch = Batch()
-
-        self.sword = SwordLoader().get_sword_sprite()
-        self.sword.batch = self.gameobject_batch
-        self.sword.visible = False
+        
+        self.game_manager = GameManager(self.game_batch)
 
         # ! Background drawn manually, not included in batch
         self.background = pyglet.shapes.Rectangle(
@@ -75,9 +73,6 @@ class GameManager(Window):
         self.game_state_background.anchor_x = self.game_state_background.width // 2
         self.game_state_background.anchor_y = 0
 
-        # TODO: Initialize object detection module that detects objects in the game area and returns their positions or provides a way to check if a specific position is occupied
-        # TODO: Initialize game logic module that uses the object detection module to allow interaction with game objects (e.g. hand could push or pickup a ball)
-
         # Start the pyglet loop
         pyglet.clock.schedule_interval(self.update, 1.0 / Config.UPDATE_RATE)
         pyglet.app.run()
@@ -101,7 +96,7 @@ class GameManager(Window):
                 # Object detection
                 high, low = self.object_detection.detect_object(
                     perspective_transformed_frame)
-                self.handle_sword(high, low)
+                self.game_manager.update_sword(high, low)
 
         image_data = FrameTransformer.cv2_to_pyglet(perspective_transformed_frame if perspective_transformed_frame is not None else frame)
         self.frame_texture.blit_into(
@@ -112,38 +107,9 @@ class GameManager(Window):
         # Adjust game state
         new_game_state = GameState.RUNNING if perspective_transformed_frame is not None else GameState.SEARCHING_AREA
         self.handle_game_state(dt, new_game_state)
+        self.game_manager.update(dt)
 
-    def handle_sword(self, high: tuple[float, float] = None, low: tuple[float, float] = None):
-        if high is not None and low is not None:
-            # Handle sword positioning and rotation
-            self.sword.visible = True
-
-            # Calculate rotation angle based on direction from low to high
-            dx = high[0] - low[0]
-            dy = high[1] - low[1]
-
-            # Calculate rotation angle in degrees from the vector direction
-            angle = 90  # Base angle adjustment for the sword image
-            if dx == 0:
-                angle += 180 if dy < 0 else 0
-            else:
-                angle_rad = math.atan2(dy, dx)
-                angle -= math.degrees(angle_rad)
-
-            # Lerp position with higher factor for smoother movement
-            position_lerp_factor = 0.8
-            self.sword.x = self.sword.x + (high[0] - self.sword.x) * position_lerp_factor
-            self.sword.y = self.sword.y + (high[1] - self.sword.y) * position_lerp_factor
-
-            # Lerp rotation with slightly lower factor for smoother rotation
-            rotation_lerp_factor = 0.6
-            angle_diff = (angle - self.sword.rotation) % 360
-            if angle_diff > 180:
-                angle_diff -= 360
-
-            self.sword.rotation = self.sword.rotation + angle_diff * rotation_lerp_factor
-        else:
-            self.sword.visible = False
+    
 
     def handle_game_state(self, dt: float, new_game_state: GameState):
         # Update game state based on whether we can see the board
@@ -189,7 +155,7 @@ class GameManager(Window):
             self
             self.game_state_batch.draw()
         else:
-            self.gameobject_batch.draw()
+            self.game_batch.draw()
 
     def on_close(self):
         self.camera.release()
@@ -217,7 +183,7 @@ def main(video_id: int, width: int, height: int, debug: bool, board_ids: str) ->
     # Parse board_ids string into a list of ints
     board_ids_list = [int(x) for x in board_ids.split(",") if x.strip().isdigit()]
 
-    GameManager(video_id=video_id, board_ids=board_ids_list)
+    GameWindow(video_id=video_id, board_ids=board_ids_list)
 
 
 if __name__ == "__main__":
