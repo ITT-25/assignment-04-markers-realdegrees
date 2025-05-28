@@ -22,6 +22,18 @@ Controls are displayed in the window title. Console logs give further info about
 
 ### AR Game
 
+features:
+- Marker Extrapolation (4th marker is estimated if only 3 markers are visible)
+- Marker Caching (Saves marker positions for a short duration to smooth gameplay when marker visibility drops briefly)
+- Contour based fingertip detection
+    - backgroundsubstractor calculates contours on 2 seconds of history
+    - countour with the highest y position is selected
+    - highest and lowest point of the countour are calculated
+    - fingertip position is at the highest point
+    - fingertip rotation is based on vector from lowest to highest point
+
+Asset Source: https://catdev-pixelarts.itch.io/catdevs-exotics-swords
+
 TODO: Write disclaimer about webcam performance (direct webcam resulted in ~3fps, obs virtual cam stable 60fps)
 
 ### AR Game (3D)
