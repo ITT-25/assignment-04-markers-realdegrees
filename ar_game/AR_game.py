@@ -79,12 +79,12 @@ class GameManager(Window):
         # Handle state transitions
         if self.game_state == GameState.SEARCHING_AREA and new_game_state == GameState.RUNNING:
             # Start resuming countdown when board is found
-            self.resume_time = Config.RESUME_DURATION
             self.game_state = GameState.RESUMING
         elif self.game_state == GameState.RESUMING:
             # If board lost while resuming, go back to searching
             if new_game_state == GameState.SEARCHING_AREA:
                 self.game_state = GameState.SEARCHING_AREA
+                self.resume_time = Config.RESUME_DURATION
             # Otherwise count down to running state
             elif self.resume_time <= 0:
                 self.game_state = GameState.RUNNING
@@ -93,7 +93,7 @@ class GameManager(Window):
         elif self.game_state == GameState.RUNNING and new_game_state == GameState.SEARCHING_AREA:
             # If we lose the board while running, go back to searching
             self.game_state = GameState.SEARCHING_AREA
-            self.resume_time = 0.0
+            self.resume_time = Config.RESUME_DURATION
 
         self.background.image = FrameTransformer.cv2_to_pyglet(
             perspective_transformed_frame if perspective_transformed_frame is not None else frame
