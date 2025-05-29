@@ -29,7 +29,7 @@ class GameWindow(Window):
         video_id: int,
         board_ids=None,
     ):
-        super().__init__(Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT, "Fitness Trainer")
+        super().__init__(Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT, "Frucht NinjAR")
         self.camera = Camera(video_id=video_id)
         self.marker_detection = MarkerDetection(board_ids)
         self.object_detection = ObjectDetection()
