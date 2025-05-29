@@ -8,11 +8,11 @@ import math
 from pyglet.gl import GL_DEPTH_TEST, GL_CULL_FACE, glEnable
 from pyglet.math import Mat4, Vec3
 
-from AR_model import Model
-from character import Character
-from game_manager import GameManager
-from utils import cv2glet, estimatePoseMarker, get_center_of_marker
-from config import (
+from src.AR_model import Model
+from src.character import Character
+from src.game_manager import GameManager
+from src.utils import cv2glet, estimatePoseMarker, get_center_of_marker
+from src.config import (
     INVERSE_MATRIX, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_Z,
     CAMERA_MATRIX, DIST_COEFFS
 )
@@ -129,8 +129,8 @@ def main():
     glEnable(GL_DEPTH_TEST)
     glEnable(GL_CULL_FACE)
     
-    enton_path = os.path.join(os.path.dirname(__file__), "enton.obj")
-    glurak_path = os.path.join(os.path.dirname(__file__), "glurak.obj")
+    enton_path = os.path.join(os.path.dirname(__file__), "models", "enton.obj")
+    glurak_path = os.path.join(os.path.dirname(__file__), "models", "glurak.obj")
     
     # Create character models
     character1_model = Model(

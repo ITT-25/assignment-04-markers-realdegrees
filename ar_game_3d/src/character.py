@@ -1,10 +1,10 @@
 import time
 import random
 from typing import TYPE_CHECKING
-from config import ATTACK_COOLDOWN
+from src.config import ATTACK_COOLDOWN
 
 if TYPE_CHECKING:
-    from AR_model import Model
+    from src.AR_model import Model
 
 class Character:
     

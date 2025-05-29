@@ -3,8 +3,8 @@ Game Manager class for the 3D AR Game
 """
 import numpy as np
 from typing import List
-from character import Character
-from config import INTERACTION_DISTANCE
+from src.character import Character
+from src.config import INTERACTION_DISTANCE
 
 class GameManager:
     """Manages the 3D AR game state and interactions"""
