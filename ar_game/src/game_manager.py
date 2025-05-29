@@ -14,7 +14,7 @@ class GameManager:
     gameobjects: list[GameObject] = []
     sword: GameObject
     point_labels: Deque[pyglet.text.Label] = deque(maxlen=10)
-    spawning_enabled: bool = True
+    spawning_enabled: bool = False
     _spawn_cooldown: float = Config.FRUIT_INTERVAL
     _last_spawn_time: float = 0.0
     _min_fruits: int = 10
@@ -94,8 +94,25 @@ class GameManager:
         self.cleanup_gameobjects()
         
         for label in self.point_labels:
-            label.opacity -= dt * 255 / 3  # Fade out labels
+            label.opacity -= dt * 255 / 2  # Fade out labels
             label.opacity = max(0, label.opacity)  # Ensure opacity doesn't go below 0
+            
+            # Move labels toward the top center of the screen
+            target_x, target_y = self.level_manager.get_bar_progress_position()
+            target_y -= label.content_height
+ 
+            # Calculate direction vector to top center
+            dir_x = target_x - label.x
+            dir_y = target_y - label.y
+            
+            # Normalize and scale the movement
+            move_speed = 80 * dt
+            label.x += dir_x * 0.03 * move_speed
+            label.y += dir_y * 0.05 * move_speed
+            
+            # Add slight random jitter for visual effect
+            label.x += random.uniform(-1, 1) * dt * 20
+            label.y += random.uniform(-0.5, 1) * dt * 30
             
             
     def cleanup_gameobjects(self):
@@ -122,7 +139,7 @@ class GameManager:
         for obj in off_screen_objects:
             if obj.points > 0:
                 subtract_points = obj.points // 2
-                self.level_manager.decrement_points(subtract_points)
+                self.level_manager.increment_points(-subtract_points)
                 label = pyglet.text.Label(
                         f"-{subtract_points}",
                         font_name='Arial',
@@ -145,15 +162,24 @@ class GameManager:
             if obj.off_screen:
                 continue
             
+            # Calculate distance between centers
+            dx = abs(self.sword.x - obj.x)
+            dy = abs(self.sword.y - obj.y)
+            
+            # Half-width and half-height of both objects
+            sword_half_width = self.sword.width / 2
+            sword_half_height = self.sword.height / 2
+            obj_half_width = obj.width / 2
+            obj_half_height = obj.height / 2
+            
+            # Check if the objects' rectangles overlap
             colliding = (
-                self.sword.x < obj.x + obj.width and
-                self.sword.x + self.sword.width > obj.x and
-                self.sword.y < obj.y + obj.height and
-                self.sword.y + self.sword.height > obj.y
+                dx < (sword_half_width + obj_half_width) and
+                dy < (sword_half_height + obj_half_height)
             )
-            # Check if the sword intersects with the fruit
+            
             if self.sword.visible and colliding:
-                # Collision detected, handle it
+                # Update points, init points label, delete object
                 self.level_manager.increment_points(obj.points)
                 self.point_labels.append(
                     pyglet.text.Label(
