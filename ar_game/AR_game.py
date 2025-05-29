@@ -17,7 +17,7 @@ from src.object_detection import ObjectDetection
 class GameState(enum.Enum):
     RUNNING = ""
     SEARCHING_AREA = "Unable to find game area! Required markers: {:d}/3"
-    RESUMING = "Resuming in {:.1f} seconds..."
+    RESUMING = "Starting in {:.1f} seconds..."
 
 
 class GameWindow(Window):
@@ -121,6 +121,8 @@ class GameWindow(Window):
         if self.game_state == GameState.SEARCHING_AREA and new_game_state == GameState.RUNNING:
             # Start resuming countdown when board is found
             self.game_state = GameState.RESUMING
+            if self.game_manager.level_manager.points <= -Config.GAME_OVER_POINT_THRESHOLD:
+                    self.game_manager.level_manager.reset()
         elif self.game_state == GameState.RESUMING:
             # If board is lost while resuming, go back to searching
             if new_game_state == GameState.SEARCHING_AREA:
@@ -129,6 +131,7 @@ class GameWindow(Window):
             # Otherwise count down to running state
             elif self.resume_time <= 0:
                 self.game_state = GameState.RUNNING
+                self.game_manager.set_spawning_enabled(True)
             else:
                 self.resume_time -= dt
         elif self.game_state == GameState.RUNNING and new_game_state == GameState.SEARCHING_AREA:
@@ -155,9 +158,8 @@ class GameWindow(Window):
                 if self.game_state == GameState.SEARCHING_AREA
                 else self.game_state.value.format(self.resume_time)
             )
-            self
             self.game_state_batch.draw()
-        else:
+        if self.game_state != GameState.SEARCHING_AREA:
             self.game_batch.draw()
 
     def on_close(self):

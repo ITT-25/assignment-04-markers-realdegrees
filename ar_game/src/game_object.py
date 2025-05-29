@@ -35,5 +35,4 @@ class GameObject(pyglet.sprite.Sprite):
         if Config.WINDOW_WIDTH is not None and Config.WINDOW_HEIGHT is not None:
             if (self.x + self.width < 0 or self.x > Config.WINDOW_WIDTH + self.width or
                 self.y + self.height < 0):
-                print(f"Object at ({self.x}, {self.y}) marked for deletion")
                 self.off_screen = True
