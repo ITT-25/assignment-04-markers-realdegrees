@@ -175,18 +175,20 @@ class GameWindow(Window):
 @click.option("--width", default=1920, type=int, help="Width of the application window")
 @click.option("--height", default=1080, type=int, help="Height of the application window")
 @click.option("--debug", is_flag=True, help="Enable debug mode")
+@click.option("--sensitivity", default=27, show_default=True, type=int, help="Contour sensitivity")
 @click.option(
     "--board-ids",
     default="0,1,2,3",
     show_default=True,
     help="Comma-separated list of marker IDs that are reserved for the game board",
 )
-def main(video_id: int, width: int, height: int, debug: bool, board_ids: str) -> None:
+def main(video_id: int, width: int, height: int, debug: bool, sensitivity: int, board_ids: str) -> None:
     """Start the AR board game with the given configuration"""
 
     Config.WINDOW_WIDTH = width
     Config.WINDOW_HEIGHT = height
     Config.DEBUG = debug
+    Config.CONTOUR_SENSITIVITY = sensitivity
 
     # Parse board_ids string into a list of ints
     board_ids_list = [int(x) for x in board_ids.split(",") if x.strip().isdigit()]

@@ -32,26 +32,31 @@ python AR_game.py --video-id 0 --width 1920 --height 1080
 This launches the game, for more CLI options use the `--help` flag.  
 It is recommended to stay on the default resolution (1920x1080)*(I did not make gravity and drag responsive so gameplay might be off at vastly different resolutions)*.  
 If you do not immediately see your webcam feed in the app, adjust the `--video-id` param.  
+If the program does not detect any markers on the board, your webcam is likely mirrored.    
 
-> ⚠️ Using my default webcam resulted in ~3 FPS. OBS Virtual Cam results in steady 60+ FPS.
+> ⚠️ PERFORMANCE: Using my default webcam resulted in ~3 FPS. OBS Virtual Cam results in steady 60+ FPS.
 If you get unreasonably bad performance try a different setup or a virtual camera.
 
-> ⚠️ The game works very good in low light conditions due to the marker caching, marker interpolation and robust fingertip detection, however it is recommended to at least have the physical board well lit to avoid any hiccups during gameplay
+> ⚠️ LIGHTING: The game works very good in low light conditions due to the marker caching, marker interpolation and robust fingertip detection, however it is recommended to have decent lighting conditions
+If the game doesn't work as expected you can also try *slightly* adjusting the `--sensitivity`
 
 > 💡 The game will automatically select the best resolution for your webcam and match it up with the window size, most webcams should be compatible (maybe not vertical ones).
-If the webcam image in the game window is slightly stretched it can be ignored as long as the aruco markers are detected correctly.
+If the webcam image in the game window is slightly stretched it can be ignored as long as the aruco markers are detected correctly. 
 
 #### Technical Features
 
 - Marker Extrapolation
     - 4th marker is estimated if only 3 markers are visible
+    - Allows players to completely cover one of the markers with their arm during gameplay without interruption
 - Marker Caching 
     - Saves marker positions for a short duration to smooth gameplay when marker visibility drops briefly
+    - Results in uninterrupted gameplay when one or multiple markers disappear
 - Contour based fingertip detection
-    - countour with the highest y position is selected
-    - highest and lowest point of the countour are calculated
-    - fingertip position is at the highest point
-    - fingertip rotation is based on vector from lowest to highest point
+    - Countour with the highest y position is selected
+    - Highest and lowest point of the countour are calculated
+    - Fingertip position is at the highest point
+    - Fingertip rotation is based on vector from lowest to highest point
+    - Use the `--debug` flag to see this visualized
 - Auto Pause
     - The game pauses and resumes when losing or gaining vision of the board
 

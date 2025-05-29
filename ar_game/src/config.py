@@ -13,7 +13,7 @@ class Config:
     GAME_OVER_POINT_THRESHOLD: int = 100
     GAMEOBJECT_BASE_SCALE: float = 0.8
     UPDATE_RATE: int = 60
-    CONTOUR_SENSITIVITY: int = 25
+    CONTOUR_SENSITIVITY: int = 27
     MIN_CONTOUR_AREA: int = 1000
     
     @staticmethod
