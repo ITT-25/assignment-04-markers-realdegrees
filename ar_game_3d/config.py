@@ -6,7 +6,7 @@ WINDOW_HEIGHT = 480
 WINDOW_Z = 420
 
 # Game configuration
-INTERACTION_DISTANCE = 100 # Distance for characters to recognize each other
+INTERACTION_DISTANCE = 150 # Distance for characters to recognize each other
 ATTACK_COOLDOWN = 2.0 # Seconds between attacks
 
 # Matrix constants
