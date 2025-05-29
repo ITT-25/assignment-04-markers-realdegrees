@@ -48,7 +48,6 @@ If the webcam image in the game window is slightly stretched it can be ignored a
 - Marker Caching 
     - Saves marker positions for a short duration to smooth gameplay when marker visibility drops briefly
 - Contour based fingertip detection
-    - backgroundsubstractor calculates contours on 2 seconds of history
     - countour with the highest y position is selected
     - highest and lowest point of the countour are calculated
     - fingertip position is at the highest point

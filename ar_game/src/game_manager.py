@@ -217,12 +217,12 @@ class GameManager:
                 angle -= math.degrees(angle_rad)
 
             # Lerp position with higher factor for smoother movement
-            position_lerp_factor = 0.8
+            position_lerp_factor = 0.45
             self.sword.x = self.sword.x + (high[0] - self.sword.x) * position_lerp_factor
             self.sword.y = self.sword.y + (high[1] - self.sword.y) * position_lerp_factor
 
             # Lerp rotation with slightly lower factor for smoother rotation
-            rotation_lerp_factor = 0.6
+            rotation_lerp_factor = 0.18
             angle_diff = (angle - self.sword.rotation) % 360
             if angle_diff > 180:
                 angle_diff -= 360

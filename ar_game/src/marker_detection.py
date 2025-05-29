@@ -3,17 +3,21 @@ import cv2
 import cv2.aruco as aruco
 import numpy as np
 import time
-from typing import Tuple, Optional, Dict
+from typing import Tuple, Optional, Dict, TYPE_CHECKING
 from src.config import Config
+
+if TYPE_CHECKING:
+    from AR_game import GameWindow
 
 
 class MarkerDetection:
-    def __init__(self, board_ids: list[int], *, dictionary_type: int = aruco.DICT_6X6_250):
+    def __init__(self, window: "GameWindow",board_ids: list[int], *, dictionary_type: int = aruco.DICT_6X6_250):
         self.aruco_dict = aruco.getPredefinedDictionary(dictionary_type)
         self.detector = aruco.ArucoDetector(self.aruco_dict, aruco.DetectorParameters())
         self.marker_cache: Dict[int, Tuple[np.ndarray, float]] = {}
         self.cache_timeout = 1
         self.board_ids = board_ids
+        self.window = window
 
     def get_inner_corner(self, marker_corners: np.ndarray, board_center: np.ndarray) -> np.ndarray:
         """Get the inner corner of a marker (closest to board center)"""
@@ -55,7 +59,7 @@ class MarkerDetection:
         detected_markers, marker_ids, _ = self.detector.detectMarkers(gray)
 
         # Draw markers for debugging
-        if Config.DEBUG and detected_markers:
+        if not self.window.is_full_board_visible() and detected_markers:
             aruco.drawDetectedMarkers(frame, detected_markers, marker_ids)
 
         # Update cache with detected markers

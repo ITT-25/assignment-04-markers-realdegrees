@@ -31,7 +31,7 @@ class GameWindow(Window):
     ):
         super().__init__(Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT, "Frucht NinjAR")
         self.camera = Camera(video_id=video_id)
-        self.marker_detection = MarkerDetection(board_ids)
+        self.marker_detection = MarkerDetection(self, board_ids)
         self.object_detection = ObjectDetection()
 
         # Init graphics stuff
@@ -77,6 +77,9 @@ class GameWindow(Window):
         pyglet.clock.schedule_interval(self.update, 1.0 / Config.UPDATE_RATE)
         pyglet.app.run()
 
+    def is_full_board_visible(self) -> bool:
+        return self.game_state != GameState.SEARCHING_AREA
+    
     def update(self, dt: float):
         frame = self.camera.get_frame()
         if frame is None:

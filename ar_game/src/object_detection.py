@@ -4,24 +4,8 @@ from typing import Optional, Sequence, Tuple
 from src.config import Config
 from cv2.typing import MatLike
 
-# Object detection for moving objects
-
-
 class ObjectDetection:
     def __init__(self):
-        """
-        Initialize object detection with background subtraction.
-
-        Args:
-            min_contour_area: Minimum area for a contour to be considered an object
-            history: Length of history for background subtraction
-            var_threshold: Threshold for background/foreground separation
-        """
-        # Background subtractor
-        self.bg_subtractor = cv2.createBackgroundSubtractorMOG2(
-            history=Config.UPDATE_RATE * 2, varThreshold=Config.CONTOUR_SENSITIVITY, detectShadows=False
-        )
-
         # Kernel for morphological operations
         self.kernel = np.ones((5, 5), np.uint8)
 
@@ -30,22 +14,26 @@ class ObjectDetection:
         Detect the object in the frame and return its highest and lowest point coordinates.
         Returns a tuple of (highest_point, lowest_point) where each point is (x, y) or None if no object is detected.
         """
-        # Apply background subtraction
-        fg_mask = self.bg_subtractor.apply(frame)
+        # Pre process frame
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        _, thresh = cv2.threshold(gray, Config.CONTOUR_SENSITIVITY, 255, cv2.THRESH_BINARY)
+        thresh = 255 - thresh        
 
         # Noise removal with morphological operations
-        fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_OPEN, self.kernel)
-        fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_CLOSE, self.kernel)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, self.kernel)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, self.kernel)
+
+        cv2.imshow("Thresholded Frame", thresh)  # Debugging line to visualize the thresholded frame
 
         # Find contours
-        contours, _ = cv2.findContours(fg_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # Find the contour with the highest point and get its lowest point
         highest_point_coords, contour = self._find_highest_point(contours)
         lowest_point_coords = self._find_lowest_point(contour)
 
         if Config.DEBUG and contour is not None:
-            cv2.drawContours(frame, [contour], 0, (0, 0, 255, 120), 1)
+            cv2.drawContours(frame, [contour], 0, (0, 0, 255, 255), 3)
 
         return (highest_point_coords, lowest_point_coords)
 
@@ -69,7 +57,7 @@ class ObjectDetection:
 
         for contour in contours:
             # Filter small contours
-            if cv2.contourArea(contour) < 1000:
+            if cv2.contourArea(contour) < Config.MIN_CONTOUR_AREA:
                 continue
 
             # Find the point with the lowest y value in this contour
