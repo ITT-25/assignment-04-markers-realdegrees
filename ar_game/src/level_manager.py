@@ -74,7 +74,7 @@ class LevelManager:
             return (self.bar_bg.x + self.bar_bg.width // 2, self.bar_bg.y + self.bar_bg.height // 2)
 
     def _calculate_required_points(self, level):
-        return 30 + (level - 1) * 10
+        return 50 + (level - 1) * 8
 
     def _get_label_text(self):
         return f'Level {self.level} | {self.points}/{self.required_points} points'
