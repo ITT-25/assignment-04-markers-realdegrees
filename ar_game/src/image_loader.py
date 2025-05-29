@@ -2,6 +2,7 @@ import os
 from PIL import Image
 import pyglet
 from typing import Dict
+from src.config import Config
 
 
 class ImageLoader:
@@ -57,7 +58,7 @@ class ImageLoader:
         # Store the image and create a sprite
         self.images[image_name] = pyglet_image
         sprite = pyglet.sprite.Sprite(pyglet_image)
-        sprite.scale = scale
+        sprite.scale = scale * Config.GAMEOBJECT_BASE_SCALE
         self.sprites[image_name] = sprite
         
         return sprite

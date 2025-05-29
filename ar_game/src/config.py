@@ -11,6 +11,7 @@ class Config:
     BOMB_POINTS: int = -30
     BOMB_CHANCE: float = 0.2
     GAME_OVER_POINT_THRESHOLD: int = 100
+    GAMEOBJECT_BASE_SCALE: float = 0.8
     
     @staticmethod
     def get_fruit_speed_range() -> tuple[float, float]:
