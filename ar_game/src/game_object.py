@@ -26,13 +26,12 @@ class GameObject(pyglet.sprite.Sprite):
         # Update position based on velocity
         self.x += self.velocity.x * dt
         self.y += self.velocity.y * dt
-        
+
         # Apply angular drag
         self.angular_velocity *= 1 - Config.ANGULAR_DRAG
         self.rotation += self.angular_velocity * dt
 
         # Mark for deletion if completely off-screen (Ignore top off-screen)
         if Config.WINDOW_WIDTH is not None and Config.WINDOW_HEIGHT is not None:
-            if (self.x + self.width < 0 or self.x > Config.WINDOW_WIDTH + self.width or
-                self.y + self.height < 0):
+            if self.x + self.width < 0 or self.x > Config.WINDOW_WIDTH + self.width or self.y + self.height < 0:
                 self.off_screen = True

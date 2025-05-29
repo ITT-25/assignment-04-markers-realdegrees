@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 class MarkerDetection:
-    def __init__(self, window: "GameWindow",board_ids: list[int], *, dictionary_type: int = aruco.DICT_6X6_250):
+    def __init__(self, window: "GameWindow", board_ids: list[int], *, dictionary_type: int = aruco.DICT_6X6_250):
         self.aruco_dict = aruco.getPredefinedDictionary(dictionary_type)
         self.detector = aruco.ArucoDetector(self.aruco_dict, aruco.DetectorParameters())
         self.marker_cache: Dict[int, Tuple[np.ndarray, float]] = {}

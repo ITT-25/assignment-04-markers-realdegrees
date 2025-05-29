@@ -15,7 +15,7 @@ class Config:
     UPDATE_RATE: int = 60
     CONTOUR_SENSITIVITY: int = 27
     MIN_CONTOUR_AREA: int = 1000
-    
+
     @staticmethod
     def get_fruit_speed_range() -> tuple[float, float]:
         """Returns the range of fruit speeds."""
@@ -24,7 +24,7 @@ class Config:
     # Old
     COLUMN_GAP: int = 10
     IMAGE_ANIMATION_INTERVAL: float = 0.5
-    
+
     STAGE_TRANSITION_DURATION: float = 1.5
     TEXT_COLOR: tuple[int, int, int] = (255, 255, 255, 255)
     PRIMARY_COLOR: tuple[int, int, int] = (31, 31, 31, 255)

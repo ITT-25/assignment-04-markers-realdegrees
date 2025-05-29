@@ -4,6 +4,7 @@ from typing import Optional, Sequence, Tuple
 from src.config import Config
 from cv2.typing import MatLike
 
+
 class ObjectDetection:
     def __init__(self):
         # Kernel for morphological operations
@@ -18,7 +19,6 @@ class ObjectDetection:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         _, thresh = cv2.threshold(gray, Config.CONTOUR_SENSITIVITY, 255, cv2.THRESH_BINARY_INV)
 
-
         # Find contours
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
@@ -29,14 +29,26 @@ class ObjectDetection:
         if Config.DEBUG and contour is not None:
             # cv2.imshow("Thresholded Frame", thresh)
             cv2.drawContours(frame, [contour], 0, (0, 0, 255, 255), 3)
-            cv2.circle(frame, (int(highest_point_coords[0]), int(Config.WINDOW_HEIGHT - highest_point_coords[1])), 50, (255, 0, 0), 15)
-            cv2.circle(frame, (int(lowest_point_coords[0]), int(Config.WINDOW_HEIGHT - lowest_point_coords[1])), 50, (255, 0, 0), 15)
+            cv2.circle(
+                frame,
+                (int(highest_point_coords[0]), int(Config.WINDOW_HEIGHT - highest_point_coords[1])),
+                50,
+                (255, 0, 0),
+                15,
+            )
+            cv2.circle(
+                frame,
+                (int(lowest_point_coords[0]), int(Config.WINDOW_HEIGHT - lowest_point_coords[1])),
+                50,
+                (255, 0, 0),
+                15,
+            )
             cv2.line(
                 frame,
                 (int(highest_point_coords[0]), int(Config.WINDOW_HEIGHT - highest_point_coords[1])),
                 (int(lowest_point_coords[0]), int(Config.WINDOW_HEIGHT - lowest_point_coords[1])),
                 (0, 255, 0),
-                5
+                5,
             )
 
         return (highest_point_coords, lowest_point_coords)
@@ -48,25 +60,25 @@ class ObjectDetection:
 
         # Y range threshold for points to be considered at the "lowest" level
         Y_RANGE_THRESHOLD = 20
-        
+
         contour_points = contour.reshape(-1, 2)
         highest_y = np.max(contour_points[:, 1])
-        
+
         # Find all points within Y_RANGE_THRESHOLD of the lowest point
         lowest_points_indices = np.where(contour_points[:, 1] >= highest_y - Y_RANGE_THRESHOLD)[0]
         lowest_points = contour_points[lowest_points_indices]
-        
+
         if len(lowest_points) == 0:
             return None
-        
+
         # Find the point with the median x value among the lowest points
         median_x = np.median(lowest_points[:, 0])
-        
+
         # Get the closest x to the median (in case the exact median isn't in the points)
         closest_idx = np.argmin(np.abs(lowest_points[:, 0] - median_x))
         x_at_median = lowest_points[closest_idx, 0]
         y_at_median = lowest_points[closest_idx, 1]
-        
+
         lowest_point_coords = (float(x_at_median), float(Config.WINDOW_HEIGHT - y_at_median))
         return lowest_point_coords
 

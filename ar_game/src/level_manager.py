@@ -3,9 +3,11 @@ from pyglet.graphics import Batch
 from pyglet.shapes import Rectangle
 from src.config import Config
 from typing import TYPE_CHECKING, Tuple
+
 if TYPE_CHECKING:
     from src.game_manager import GameManager
-    
+
+
 class LevelManager:
     def __init__(self, game_manager: "GameManager", batch: Batch):
         self.game_manager = game_manager
@@ -20,7 +22,7 @@ class LevelManager:
             width=Config.WINDOW_WIDTH,
             height=self.bar_height,
             color=(49, 49, 49),
-            batch=batch
+            batch=batch,
         )
         self.point_bar = Rectangle(
             x=0,
@@ -28,7 +30,7 @@ class LevelManager:
             width=0,
             height=self.bar_height,
             color=(32, 253, 58),
-            batch=batch
+            batch=batch,
         )
         self.loss_threshold_bar = Rectangle(
             x=Config.WINDOW_WIDTH,
@@ -36,34 +38,34 @@ class LevelManager:
             width=0,
             height=self.bar_height,
             color=(253, 65, 32),
-            batch=batch
+            batch=batch,
         )
         self.label = pyglet.text.Label(
             self._get_label_text(),
-            font_name='Arial',
+            font_name="Arial",
             font_size=18,
             x=Config.WINDOW_WIDTH // 2,
             y=Config.WINDOW_HEIGHT - self.bar_height // 2 - self.bar_margin,
-            anchor_x='center',
-            anchor_y='center',
+            anchor_x="center",
+            anchor_y="center",
             color=(255, 255, 255, 255),
-            batch=batch
+            batch=batch,
         )
         self.center_label = pyglet.text.Label(
-            '',
-            font_name='Arial',
+            "",
+            font_name="Arial",
             font_size=36,
             x=Config.WINDOW_WIDTH // 2,
             y=Config.WINDOW_HEIGHT // 2,
-            anchor_x='center',
-            anchor_y='center',
+            anchor_x="center",
+            anchor_y="center",
             color=(40, 40, 40, 255),
-            batch=batch
+            batch=batch,
         )
         self.countdown_time = 0
         self.countdown_active = False
         self._update_bar()
-        
+
     def get_bar_progress_position(self) -> Tuple[float, float]:
         """Get the position of the end of the point bar. If the point bar is empty return the loss threshold bar end position. If both are empty return center of the bar."""
         if self.point_bar.width > 0:
@@ -77,16 +79,16 @@ class LevelManager:
         return 50 + (level - 1) * 8
 
     def _get_label_text(self):
-        return f'Level {self.level} | {self.points}/{self.required_points} points'
+        return f"Level {self.level} | {self.points}/{self.required_points} points"
 
     def increment_points(self, amount: int):
         self.points += amount
         if self.points >= self.required_points:
             self.next_level()
         elif self.points <= -Config.GAME_OVER_POINT_THRESHOLD:
-            print('Game Over! You lost too many points.')
+            print("Game Over! You lost too many points.")
             self.game_manager.set_spawning_enabled(False)
-            self.center_label.text = 'Game Over! Hide the physical board to restart.'
+            self.center_label.text = "Game Over! Hide the physical board to restart."
             self.center_label.font_size = 36
             self.center_label.color = (253, 65, 32, 255)
         self._update_bar()
@@ -111,7 +113,6 @@ class LevelManager:
         self.loss_threshold_bar.width = neg_width
         self.loss_threshold_bar.x = Config.WINDOW_WIDTH - neg_width
         self.label.text = self._get_label_text()
-       
 
     def next_level(self):
         self.level += 1
@@ -120,6 +121,7 @@ class LevelManager:
         # Adjust game difficulty
         self.game_manager._min_objects = min(20, 10 + self.level * 2)
         from src.config import Config as GameConfig
+
         GameConfig.BOMB_CHANCE = min(0.5, 0.2 + self.level * 0.03)
         self.game_manager.set_spawning_enabled(False)
         self._start_countdown(3)
@@ -128,7 +130,7 @@ class LevelManager:
     def _start_countdown(self, seconds):
         self.countdown_time = seconds
         self.countdown_active = True
-        self.center_label.text = f'Next level in {int(self.countdown_time)}...'
+        self.center_label.text = f"Next level in {int(self.countdown_time)}..."
         pyglet.clock.schedule_interval(self._countdown_update, 1.0)
 
     def _countdown_update(self, dt):
@@ -136,10 +138,9 @@ class LevelManager:
             return
         self.countdown_time -= 1
         if self.countdown_time > 0:
-            self.center_label.text = f'Next level in {int(self.countdown_time)}...'
+            self.center_label.text = f"Next level in {int(self.countdown_time)}..."
         else:
-            self.center_label.text = ''
+            self.center_label.text = ""
             self.countdown_active = False
             self.game_manager.set_spawning_enabled(True)
             pyglet.clock.unschedule(self._countdown_update)
-

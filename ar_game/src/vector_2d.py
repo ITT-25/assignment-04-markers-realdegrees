@@ -1,6 +1,7 @@
 from __future__ import annotations
 import math
 
+
 class Vector2D:
     def __init__(self, x: float, y: float):
         self.x = x
@@ -20,9 +21,7 @@ class Vector2D:
     def reflect(self, normal: Vector2D) -> Vector2D:
         """Reflect the vector on a normal vector."""
         dot_product = self.x * normal.x + self.y * normal.y
-        return Vector2D(
-            self.x - 2 * dot_product * normal.x, self.y - 2 * dot_product * normal.y
-        )
+        return Vector2D(self.x - 2 * dot_product * normal.x, self.y - 2 * dot_product * normal.y)
 
     def rotate_angle(self, angle: float) -> Vector2D:
         """Rotate the vector by a given angle in degrees."""

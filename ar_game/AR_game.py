@@ -38,12 +38,15 @@ class GameWindow(Window):
         self.game_batch = Batch()
         self.ui_batch = Batch()
         self.game_state_batch = Batch()
-        
+
         self.game_manager = GameManager(self.game_batch)
 
         # ! Background drawn manually, not included in batch
         self.background = pyglet.shapes.Rectangle(
-            0, 0, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT,
+            0,
+            0,
+            Config.WINDOW_WIDTH,
+            Config.WINDOW_HEIGHT,
             color=(255, 255, 255),
         )
         # Create a persistent texture and sprite for the video frame
@@ -63,12 +66,15 @@ class GameWindow(Window):
             color=(15, 15, 15, 255),
             anchor_x="center",
             anchor_y="bottom",
-            batch=self.game_state_batch
+            batch=self.game_state_batch,
         )
         self.game_state_background = pyglet.shapes.Rectangle(
-            Config.WINDOW_WIDTH // 2, 45, Config.WINDOW_WIDTH, int(self.game_state_label.font_size * 2),
+            Config.WINDOW_WIDTH // 2,
+            45,
+            Config.WINDOW_WIDTH,
+            int(self.game_state_label.font_size * 2),
             color=(255, 255, 255),
-            batch=self.game_state_batch
+            batch=self.game_state_batch,
         )
         self.game_state_background.anchor_x = self.game_state_background.width // 2
         self.game_state_background.anchor_y = 0
@@ -79,7 +85,7 @@ class GameWindow(Window):
 
     def is_full_board_visible(self) -> bool:
         return self.game_state != GameState.SEARCHING_AREA
-    
+
     def update(self, dt: float):
         frame = self.camera.get_frame()
         if frame is None:
@@ -92,30 +98,27 @@ class GameWindow(Window):
         perspective_transformed_frame = None
         high, low = None, None
         if inner_corners is not None:
-            perspective_transformed_frame = PerspectiveTransformer.transform(
-                frame, inner_corners)
+            perspective_transformed_frame = PerspectiveTransformer.transform(frame, inner_corners)
             if perspective_transformed_frame is not None:
                 perspective_transformed_frame = cv2.flip(perspective_transformed_frame, 1)
 
                 # Object detection
-                high, low = self.object_detection.detect_object(
-                    perspective_transformed_frame)
+                high, low = self.object_detection.detect_object(perspective_transformed_frame)
                 self.game_manager._update_sword(high, low)
 
-        image_data = FrameTransformer.cv2_to_pyglet(perspective_transformed_frame if perspective_transformed_frame is not None else frame)
-        self.frame_texture.blit_into(
-            image_data,
-            0, 0, 0
+        image_data = FrameTransformer.cv2_to_pyglet(
+            perspective_transformed_frame if perspective_transformed_frame is not None else frame
         )
+        self.frame_texture.blit_into(image_data, 0, 0, 0)
 
         # Adjust game state
-        desired_game_state = GameState.RUNNING if perspective_transformed_frame is not None else GameState.SEARCHING_AREA
+        desired_game_state = (
+            GameState.RUNNING if perspective_transformed_frame is not None else GameState.SEARCHING_AREA
+        )
         self.update_game_state(dt, desired_game_state)
-        
+
         if self.game_state == GameState.RUNNING:
             self.game_manager.update(dt, high, low)
-
-    
 
     def update_game_state(self, dt: float, new_game_state: GameState):
         # Update game state based on whether we can see the board
@@ -125,7 +128,7 @@ class GameWindow(Window):
             # Start resuming countdown when board is found
             self.game_state = GameState.RESUMING
             if self.game_manager.level_manager.points <= -Config.GAME_OVER_POINT_THRESHOLD:
-                    self.game_manager.level_manager.reset()
+                self.game_manager.level_manager.reset()
         elif self.game_state == GameState.RESUMING:
             # If board is lost while resuming, go back to searching
             if new_game_state == GameState.SEARCHING_AREA:
