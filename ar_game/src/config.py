@@ -4,10 +4,10 @@ class Config:
     DEBUG: bool = False
     RESUME_DURATION: float = 3
     ANGULAR_DRAG: float = 0.01
-    LINEAR_DRAG: float = 0.007
-    GRAVITY: float = 9.81 * 20
+    LINEAR_DRAG: float = 0.005
+    GRAVITY: float = 9.81 * 30
     FRUIT_POINTS: int = 10
-    FRUIT_INTERVAL: float = 0.8
+    OBJECT_INTERVAL: float = 0.8
     BOMB_POINTS: int = -30
     BOMB_CHANCE: float = 0.2
     GAME_OVER_POINT_THRESHOLD: int = 100
@@ -16,7 +16,7 @@ class Config:
     @staticmethod
     def get_fruit_speed_range() -> tuple[float, float]:
         """Returns the range of fruit speeds."""
-        return Config.WINDOW_WIDTH * 0.3, Config.WINDOW_WIDTH * 0.5
+        return Config.WINDOW_WIDTH * 0.325, Config.WINDOW_WIDTH * 0.525
 
     # Old
     COLUMN_GAP: int = 10

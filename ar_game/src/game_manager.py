@@ -15,9 +15,9 @@ class GameManager:
     sword: GameObject
     point_labels: Deque[pyglet.text.Label] = deque(maxlen=10)
     spawning_enabled: bool = False
-    _spawn_cooldown: float = Config.FRUIT_INTERVAL
+    _spawn_cooldown: float = Config.OBJECT_INTERVAL
     _last_spawn_time: float = 0.0
-    _min_fruits: int = 10
+    _min_objects: int = 10
     
     def __init__(self, batch: Batch):
         self.batch = batch
@@ -74,25 +74,26 @@ class GameManager:
     def update(self, dt: float, high: tuple[float, float] = None, low: tuple[float, float] = None):
         """Update the game state."""
     
-        # Spawn fruits if needed
+        # Spawn gameobjects if needed
         import time
         now = time.time()
-        if self.spawning_enabled and len(self.gameobjects) < self._min_fruits:
+        if self.spawning_enabled and len(self.gameobjects) < self._min_objects:
             if now - self._last_spawn_time > self._spawn_cooldown:
                 self.spawn_gameobject()
                 self._last_spawn_time = now
-                self._spawn_cooldown = random.uniform(Config.FRUIT_INTERVAL * 0.4, Config.FRUIT_INTERVAL * 1.2)  # Randomize spawn interval
+                self._spawn_cooldown = random.uniform(Config.OBJECT_INTERVAL * 0.4, Config.OBJECT_INTERVAL * 1.2)  # Randomize spawn interval
 
-        # Update sword
+        # Update gameobjects
         self._update_sword(high, low)
+        for obj in self.gameobjects:
+            obj.physics_update(dt)
 
-        # Update fruits
-        for fruit in self.gameobjects:
-            fruit.physics_update(dt)
-        
         self.check_collisions()
         self.cleanup_gameobjects()
+        self.animate_point_labels(dt)
         
+            
+    def animate_point_labels(self, dt: float):
         for label in self.point_labels:
             label.opacity -= dt * 255 / 2  # Fade out labels
             label.opacity = max(0, label.opacity)  # Ensure opacity doesn't go below 0
@@ -113,7 +114,6 @@ class GameManager:
             # Add slight random jitter for visual effect
             label.x += random.uniform(-1, 1) * dt * 20
             label.y += random.uniform(-0.5, 1) * dt * 30
-            
             
     def cleanup_gameobjects(self):
         if not self.spawning_enabled:

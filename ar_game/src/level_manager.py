@@ -118,7 +118,7 @@ class LevelManager:
         self.points = 0
         self.required_points = self._calculate_required_points(self.level)
         # Adjust game difficulty
-        self.game_manager._min_fruits = min(20, 10 + self.level * 2)
+        self.game_manager._min_objects = min(20, 10 + self.level * 2)
         from src.config import Config as GameConfig
         GameConfig.BOMB_CHANCE = min(0.5, 0.2 + self.level * 0.03)
         self.game_manager.set_spawning_enabled(False)
