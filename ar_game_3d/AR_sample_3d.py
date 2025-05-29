@@ -70,7 +70,7 @@ WINDOW_Z = 420
 window = pyglet.window.Window(WINDOW_WIDTH, WINDOW_HEIGHT, resizable=False)
 
 ## setup the camera
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(2)
 cameraMatrix = np.array([[534.34144579, 0., 339.15527836], [0., 534.68425882,  233.84359494], [0., 0., 1.]], dtype=np.float64)
 distCoeffs = np.array([0, 0, 0, 0], dtype=np.float64)
 
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     glEnable(GL_CULL_FACE)
 
     models = []
-    models.append(Model(path="enton.obj", id=6, win_w=WINDOW_WIDTH, win_h=WINDOW_HEIGHT, rot_x=270, rot_y=90, rot_z=270, scaling_factor=0.2))
+    models.append(Model(path="enton.obj", id=5, win_w=WINDOW_WIDTH, win_h=WINDOW_HEIGHT, rot_x=270, rot_y=90, rot_z=270, scaling_factor=0.2))
 
     # Set the application wide view matrix (camera):
     window.view = Mat4.look_at(position=Vec3(0, 0, WINDOW_Z), target=Vec3(0, 0, 0), up=Vec3(0, 1, 0))
