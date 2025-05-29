@@ -1,3 +1,4 @@
+import os
 import cv2
 import cv2.aruco as aruco
 import numpy as np
@@ -128,25 +129,28 @@ def main():
     glEnable(GL_DEPTH_TEST)
     glEnable(GL_CULL_FACE)
     
+    enton_path = os.path.join(os.path.dirname(__file__), "enton.obj")
+    glurak_path = os.path.join(os.path.dirname(__file__), "glurak.obj")
+    
     # Create character models
     character1_model = Model(
-        path="enton.obj", 
-        id=4, 
-        win_w=WINDOW_WIDTH, 
-        win_h=WINDOW_HEIGHT, 
-        rot_x=270, 
-        rot_y=90, 
-        rot_z=270, 
+        path=enton_path,
+        id=4,
+        win_w=WINDOW_WIDTH,
+        win_h=WINDOW_HEIGHT,
+        rot_x=270,
+        rot_y=90,
+        rot_z=270,
         scaling_factor=0.2
     )
     
     character2_model = Model(
-        path="glurak.obj", 
-        id=5, 
-        win_w=WINDOW_WIDTH, 
-        win_h=WINDOW_HEIGHT, 
-        rot_x=90, 
-        rot_y=90, 
+        path=glurak_path,
+        id=5,
+        win_w=WINDOW_WIDTH,
+        win_h=WINDOW_HEIGHT,
+        rot_x=90,
+        rot_y=90,
         rot_z=0, 
         scaling_factor=0.2
     )
