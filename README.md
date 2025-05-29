@@ -38,7 +38,7 @@ If the program does not detect any markers on the board, your webcam is likely m
 If you get unreasonably bad performance try a different setup or a virtual camera.
 
 > ⚠️ LIGHTING: The game works very good in low light conditions due to the marker caching, marker interpolation and robust fingertip detection, however it is recommended to have decent lighting conditions
-If the game doesn't work as expected you can also try *slightly* adjusting the `--sensitivity`
+If the game doesn't work as expected you can also try *slightly* adjusting the `--sensitivity` (Lower for bright environments e.g. 20, Higher for dark environments e.g. 80)
 
 > 💡 The game will automatically select the best resolution for your webcam and match it up with the window size, most webcams should be compatible (maybe not vertical ones).
 If the webcam image in the game window is slightly stretched it can be ignored as long as the aruco markers are detected correctly. 
@@ -78,15 +78,27 @@ When point reductions reduce your points below `0 points` the `negative point ba
 
 <img src="doc/game_over.gif" width="35%" alt="Game over demonstration">
 
-#### Sources
+### AR Game (3D)
 
-All assets used are free to use, modify and distribute.
+A simple extension of the sample app. Marker IDs 4 and 5 are mapped to [enton.obj](ar_game_3d/enton.obj) and [glurak.obj](ar_game_3d/glurak.obj).  
+When the markers are within a certain distance of each other, the characters will start attacking each other. They use the default scaling animation to attack.  
+The first character that drops to 0 health shrinks and disappears.
+
+```sh
+cd ar_game
+python AR_game_3d.py
+```
+
+**Known Issues**
+- No matter which model I tried or how I exported them from blender I couldn't get the model to have textures.  
+- The models often invert their rotation briefly, likely due to the way marker position and rotation are calculated.  
+
+## Sources
+
+All assets used are free to use, modify and distribute non-commercially.
 
 Asset Sources: 
 - https://catdev-pixelarts.itch.io/catdevs-exotics-swords (Sword)
 - https://jennpixel.itch.io/fruits-pack-12 (Fruits)
 - https://ahninniah.itch.io/free-game-items-pack-2 (Bomb)
-
-### AR Game (3D)
-
-TODO
+- https://www.cgtrader.com/free-3d-models/animals/reptile/animated-charizard-pokemon-3d-model (3D Model)
