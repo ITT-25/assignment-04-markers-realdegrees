@@ -107,13 +107,10 @@ class GameManager:
             dir_y = target_y - label.y
             
             # Normalize and scale the movement
-            move_speed = 80 * dt
+            move_speed = 40 * dt
             label.x += dir_x * 0.03 * move_speed
             label.y += dir_y * 0.05 * move_speed
             
-            # Add slight random jitter for visual effect
-            label.x += random.uniform(-1, 1) * dt * 20
-            label.y += random.uniform(-0.5, 1) * dt * 30
             
     def cleanup_gameobjects(self):
         if not self.spawning_enabled:
@@ -178,22 +175,23 @@ class GameManager:
                 dy < (sword_half_height + obj_half_height)
             )
             
+            
+
             if self.sword.visible and colliding:
                 # Update points, init points label, delete object
                 self.level_manager.increment_points(obj.points)
-                self.point_labels.append(
-                    pyglet.text.Label(
-                        f"{'+' if obj.points > 0 else ''}{obj.points}",
-                        font_name='Arial',
-                        font_size=52,
-                        x=obj.x,
-                        y=obj.y,
+                label = pyglet.text.Label(
+                    f"{'+' if obj.points > 0 else ''}{obj.points}",
+                    font_name='Arial',
+                    font_size=48,
+                    x=obj.x,
+                    y=obj.y,
                         anchor_x='center',
                         anchor_y='center',
                         color=(0, 255, 0, 255) if obj.points > 0 else (255, 0, 0, 255),
                         batch=self.batch
                     )
-                )
+                self.point_labels.append(label)
                 self.gameobjects.remove(obj)
                 obj.delete()
 
