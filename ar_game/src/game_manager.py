@@ -34,13 +34,13 @@ class GameManager:
         
         if spawn_bomb:
             # Pick a random bomb image
-            sprite = ImageLoader().get_sprite("bomb.png", scale=random.uniform(0.7, 1.2))
+            sprite = ImageLoader().get_sprite("bomb.png", scale=random.uniform(0.8, 1.1))
             gameobject = GameObject(sprite, y=random.uniform(Config.WINDOW_HEIGHT * 0.2, Config.WINDOW_HEIGHT * 0.45), points=Config.BOMB_POINTS)
 
         else:
             # Pick a random fruit image
             fruit_name = random.choice(self.fruit_names)
-            sprite = ImageLoader().get_sprite(fruit_name, scale=random.uniform(0.7, 1.2))
+            sprite = ImageLoader().get_sprite(fruit_name, scale=random.uniform(0.8, 1.1))
             gameobject = GameObject(sprite, y=random.uniform(Config.WINDOW_HEIGHT * 0.2, Config.WINDOW_HEIGHT * 0.45), points=Config.FRUIT_POINTS)
 
         # Choose left or right
@@ -89,7 +89,14 @@ class GameManager:
             fruit.physics_update(dt)
         
         self.check_collisions()
+        self.cleanup_gameobjects()
         
+        for label in self.point_labels:
+            label.opacity -= dt * 255 / 3  # Fade out labels
+            label.opacity = max(0, label.opacity)  # Ensure opacity doesn't go below 0
+            
+            
+    def cleanup_gameobjects(self):
         # Remove off-screen or deleted objects immediately after collision check
         # Split objects into those on-screen and those off-screen
         on_screen_objects: List[GameObject] = []
@@ -123,11 +130,6 @@ class GameManager:
                 label.y += label.content_height // 2 * (-1 if obj.y > 0 else 1) * 1.2
                 self.point_labels.append(label)
             obj.delete()
-        
-        for label in self.point_labels:
-            label.opacity -= dt * 255 / 4  # Fade out labels
-            label.opacity = max(0, label.opacity)  # Ensure opacity doesn't go below 0
-        
         
     def check_collisions(self):
         """Check for collisions between the sword and game objects."""
