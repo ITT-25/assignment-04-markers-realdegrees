@@ -10,6 +10,7 @@ class Config:
     FRUIT_INTERVAL: float = 0.8
     BOMB_POINTS: int = -30
     BOMB_CHANCE: float = 0.2
+    GAME_OVER_POINT_THRESHOLD: int = 100
     
     @staticmethod
     def get_fruit_speed_range() -> tuple[float, float]:

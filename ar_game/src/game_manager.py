@@ -3,6 +3,7 @@ from collections import deque
 from typing import Deque, List
 import pyglet
 from pyglet.graphics import Batch
+from src.level_manager import LevelManager
 from src.config import Config
 from src.image_loader import ImageLoader
 from src.vector_2d import Vector2D
@@ -13,7 +14,6 @@ class GameManager:
     gameobjects: list[GameObject] = []
     sword: GameObject
     point_labels: Deque[pyglet.text.Label] = deque(maxlen=10)
-    points: int = 0
     spawning_enabled: bool = True
     _spawn_cooldown: float = Config.FRUIT_INTERVAL
     _last_spawn_time: float = 0.0
@@ -24,6 +24,8 @@ class GameManager:
         self.sword = GameObject(ImageLoader().get_sprite("sword.png", rotation=45, scale=1.2))
         self.sword.batch = self.batch
         self.sword.visible = False
+        
+        self.level_manager = LevelManager(self, self.batch)
 
         self.fruit_names = [
             "apple.png", "banana.png", "cherry.png", "grape.png", "kiwi.png", "lemon.png", "orange.png", "peach.png", "pear.png", "pineapple.png", "strawberry.png", "watermelon.png"
@@ -97,6 +99,12 @@ class GameManager:
             
             
     def cleanup_gameobjects(self):
+        if not self.spawning_enabled:
+            for obj in self.gameobjects:
+                obj.delete()
+            self.gameobjects.clear()  # Clear all game objects when spawning is disabled
+            return
+        
         # Remove off-screen or deleted objects immediately after collision check
         # Split objects into those on-screen and those off-screen
         on_screen_objects: List[GameObject] = []
@@ -114,7 +122,7 @@ class GameManager:
         for obj in off_screen_objects:
             if obj.points > 0:
                 subtract_points = obj.points // 2
-                self.points -= subtract_points
+                self.level_manager.decrement_points(subtract_points)
                 label = pyglet.text.Label(
                         f"-{subtract_points}",
                         font_name='Arial',
@@ -146,7 +154,7 @@ class GameManager:
             # Check if the sword intersects with the fruit
             if self.sword.visible and colliding:
                 # Collision detected, handle it
-                self.points += obj.points
+                self.level_manager.increment_points(obj.points)
                 self.point_labels.append(
                     pyglet.text.Label(
                         f"{'+' if obj.points > 0 else ''}{obj.points}",
