@@ -38,7 +38,7 @@ If the program does not detect any markers on the board, your webcam is likely m
 If you get unreasonably bad performance try a different setup or a virtual camera.
 
 > ⚠️ LIGHTING: The game works very good in low light conditions due to the marker caching, marker interpolation and robust fingertip detection, however it is recommended to have decent lighting conditions
-If the game doesn't work as expected you can also try *slightly* adjusting the `--sensitivity` (Lower for bright environments e.g. 20, Higher for dark environments e.g. 80)
+If the game doesn't work as expected you can adjust the `--sensitivity` (Lower for bright environments e.g. 15, Higher for dark environments e.g. 70+)
 
 > 💡 The game will automatically select the best resolution for your webcam and match it up with the window size, most webcams should be compatible (maybe not vertical ones).
 If the webcam image in the game window is slightly stretched it can be ignored as long as the aruco markers are detected correctly. 

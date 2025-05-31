@@ -178,7 +178,7 @@ class GameWindow(Window):
 @click.option("--width", default=1920, type=int, help="Width of the application window")
 @click.option("--height", default=1080, type=int, help="Height of the application window")
 @click.option("--debug", is_flag=True, help="Enable debug mode")
-@click.option("--sensitivity", default=27, show_default=True, type=int, help="Contour sensitivity")
+@click.option("--sensitivity", default=20, show_default=True, type=int, help="Contour sensitivity")
 @click.option(
     "--board-ids",
     default="0,1,2,3",
