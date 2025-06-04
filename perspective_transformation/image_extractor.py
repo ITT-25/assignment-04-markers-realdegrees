@@ -46,11 +46,8 @@ class ImageTransformer:
         self, image: np.ndarray, points: np.ndarray, *, width: int, height: int, copy: bool = False
     ) -> np.ndarray:
         """Apply perspective transformation based on selected points"""
-        print("Applying perspective transformation...")
+        print("Applying perspective transformation with ordered points...")
         dst_pts = np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype=np.float32)
-
-        print(f"Source points (ordered): {points}")
-        print(f"Destination points: {dst_pts}")
 
         matrix = cv2.getPerspectiveTransform(points, dst_pts)
         if copy:
@@ -60,7 +57,6 @@ class ImageTransformer:
     # ? This is required because apparently the order of points influences the final "perspective origin" so by manually reordering it outputs the result image at the same rotation as the original image
     def order_points(self, points: List[Tuple[int, int]]) -> Optional[np.ndarray]:
         """Sort 4 points into top-left, top-right, bottom-right, bottom-left robustly."""
-        print("Ordering points for consistent transformation...")
         points_np = np.array(points, dtype="float32")
 
         if len(points_np) != 4:
