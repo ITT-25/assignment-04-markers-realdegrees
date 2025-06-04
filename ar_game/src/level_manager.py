@@ -43,7 +43,7 @@ class LevelManager:
         self.label = pyglet.text.Label(
             self._get_label_text(),
             font_name="Arial",
-            font_size=18,
+            font_size=int(18 * Config.get_text_scale()),
             x=Config.WINDOW_WIDTH // 2,
             y=Config.WINDOW_HEIGHT - self.bar_height // 2 - self.bar_margin,
             anchor_x="center",
@@ -54,7 +54,7 @@ class LevelManager:
         self.center_label = pyglet.text.Label(
             "",
             font_name="Arial",
-            font_size=36,
+            font_size=int(36 * Config.get_text_scale()),
             x=Config.WINDOW_WIDTH // 2,
             y=Config.WINDOW_HEIGHT // 2,
             anchor_x="center",
@@ -89,7 +89,6 @@ class LevelManager:
             print("Game Over! You lost too many points.")
             self.game_manager.set_spawning_enabled(False)
             self.center_label.text = "Game Over! Hide the physical board to restart."
-            self.center_label.font_size = 36
             self.center_label.color = (253, 65, 32, 255)
         self._update_bar()
 

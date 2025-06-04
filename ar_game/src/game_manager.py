@@ -163,7 +163,7 @@ class GameManager:
                 label = pyglet.text.Label(
                     f"-{subtract_points}",
                     font_name="Arial",
-                    font_size=42,
+                    font_size=int(42 * Config.get_text_scale()),
                     x=min(max(0, obj.x), Config.WINDOW_WIDTH),
                     y=min(max(0, obj.y), Config.WINDOW_HEIGHT),
                     anchor_x="center",
@@ -197,7 +197,7 @@ class GameManager:
                 label = pyglet.text.Label(
                     f"{'+' if obj.points > 0 else ''}{obj.points}",
                     font_name="Arial",
-                    font_size=48,
+                    font_size=int(48 * Config.get_text_scale()),
                     x=obj.x,
                     y=obj.y,
                     anchor_x="center",

@@ -26,10 +26,11 @@ The game I created for this assignment is a fruit ninja clone (Frucht NinjAR ðŸ§
 
 ```sh
 cd ar_game
-python AR_game.py --video-id 0 --width 1920 --height 1080
+python AR_game.py --video-id 0 --sensitivity 20 # Adjust sensitivity using the instructions below
 ```
 
-This launches the game, for more CLI options use the `--help` flag.    
+For more CLI options use the `--help` flag.  
+
 If you do not immediately see your webcam feed in the app, adjust the `--video-id` param.  
 If the program does not detect any markers on the board, your webcam is likely **mirrored**.    
 

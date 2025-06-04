@@ -27,6 +27,14 @@ class Config:
         """Returns the range of fruit speeds, proportional to window width."""
         return Config.WINDOW_WIDTH * 0.4, Config.WINDOW_WIDTH * 0.6
 
+    @staticmethod
+    def get_text_scale() -> float:
+        """Returns a global text scale factor based on window size (based on 1920x1080)."""
+        ref_w, ref_h = 1920, 1080
+        scale_w = Config.WINDOW_WIDTH / ref_w
+        scale_h = Config.WINDOW_HEIGHT / ref_h
+        return min(scale_w, scale_h)
+
     # Old
     COLUMN_GAP: int = 10
     IMAGE_ANIMATION_INTERVAL: float = 0.5

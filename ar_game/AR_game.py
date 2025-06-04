@@ -64,7 +64,7 @@ class GameWindow(Window):
         self.game_state_label = pyglet.text.Label(
             "",
             font_name="Arial",
-            font_size=24,
+            font_size=int(24 * Config.get_text_scale()),
             x=Config.WINDOW_WIDTH // 2,
             y=50,
             color=(15, 15, 15, 255),
