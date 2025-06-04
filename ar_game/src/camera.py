@@ -5,16 +5,17 @@ from src.config import Config
 
 
 class Camera:
-    def __init__(self, video_id: int):
+    def __init__(self, video_id: int, resolution: Optional[Tuple[int, int]] = (640, 480)):
         """Initialize camera capture with specified device ID."""
 
         self.cap = cv2.VideoCapture(video_id, cv2.CAP_DSHOW)
         if not self.cap.isOpened():
             raise ValueError(f"Could not open camera with ID {video_id}")
 
-        # Find and set the highest possible resolution supported by the camera (capped at full hd)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+        # Use lowest matching resolution for better performance
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, resolution[0])
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, resolution[1])
+        self.cap.set(cv2.CAP_PROP_FPS, 50)
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 

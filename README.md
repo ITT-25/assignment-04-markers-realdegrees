@@ -29,17 +29,16 @@ cd ar_game
 python AR_game.py --video-id 0 --width 1920 --height 1080
 ```
 
-This launches the game, for more CLI options use the `--help` flag.  
-It is recommended to stay on the default resolution (1920x1080)*(I did not make gravity and drag responsive so gameplay might be off at vastly different resolutions)*.  
+This launches the game, for more CLI options use the `--help` flag.    
 If you do not immediately see your webcam feed in the app, adjust the `--video-id` param.  
-If the program does not detect any markers on the board, your webcam is likely mirrored.    
+If the program does not detect any markers on the board, your webcam is likely **mirrored**.    
 
-> ⚠️ LIGHTING: The game works very good in low light conditions due to the marker caching, marker interpolation and robust fingertip detection, however it is recommended to have decent lighting conditions
-If the game doesn't work as expected you can adjust the `--sensitivity` (Lower for bright environments e.g. 15, Higher for dark environments e.g. 70+)
-This might also depend on the webcam so if you don't get proper tracking play around with the sensitivity using the `--debug` flag until the sword follows your fingertip correctly during gameplay. I got vastly different results on my laptop vs pc.
+> ⚠️ LIGHTING: Find the correct sensitivity for your environment and setup using `--debug` and `--sensitivity <num>` params.  
+The default sensitivity of `20` offers good tracking at moderately bright conditions. Higher values will work better in dark environments (e.g. 40, 60, 80, 100+).  
+Tweak the sensitivity in the debug view until the tracking works correctly during gameplay.  
 
-> 💡 The game will automatically select the lowest resolution supported by your webcam (for performance reasons) and match it up with the window size, most webcams should be compatible (maybe not vertical ones).
-If the webcam image in the game window is slightly stretched it can be ignored as long as the aruco markers are detected correctly. 
+> 💡 The game will automatically select the closest resolution to `640x480` supported by your webcam (for performance reasons).
+If you want to improve the visuals and tracking at the cost of performance you can also manually adjust the camera resolution using the `--camera-width` and `--camera-height` flags.
 
 #### Technical Features
 

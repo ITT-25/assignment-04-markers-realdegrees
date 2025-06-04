@@ -15,7 +15,7 @@ class Config:
     UPDATE_RATE: int = 60
     CONTOUR_SENSITIVITY: int = 27
     MIN_CONTOUR_AREA: int = 1000
-    PROCESSING_SCALE: float = 0.4
+    PROCESSING_SCALE: float = 0.6
     
     @staticmethod
     def get_gameobject_base_scale() -> float:

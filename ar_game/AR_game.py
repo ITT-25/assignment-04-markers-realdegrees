@@ -14,7 +14,6 @@ from src.perspective_transformer import PerspectiveTransformer
 from src.object_detection import ObjectDetection
 import threading
 import queue
-import numpy as np
 
 
 class GameState(enum.Enum):
@@ -30,10 +29,12 @@ class GameWindow(Window):
     def __init__(
         self,
         video_id: int,
-        board_ids=None,
+        camera_width: int,
+        camera_height: int,
+        board_ids=None,        
     ):
         super().__init__(Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT, "Frucht NinjAR")
-        self.camera = Camera(video_id=video_id)
+        self.camera = Camera(video_id=video_id, resolution=(camera_width, camera_height))
         self.marker_detection = MarkerDetection(self, board_ids)
         self.object_detection = ObjectDetection()
 
@@ -208,8 +209,10 @@ class GameWindow(Window):
 
 @click.command()
 @click.option("--video-id", default=0, type=int, help="Camera video ID")
-@click.option("--width", default=1920, type=int, help="Width of the application window")
-@click.option("--height", default=1080, type=int, help="Height of the application window")
+@click.option("--width", show_default=True, default=1280, type=int, help="Width of the application window")
+@click.option("--height", show_default=True, default=720, type=int, help="Height of the application window")
+@click.option("--camera-width", show_default=True, default=640, type=int, help="Width of the camera feed (Performance intensive)")
+@click.option("--camera-height", show_default=True, default=480, type=int, help="Height of the camera feed (Performance intensive)")
 @click.option("--debug", is_flag=True, help="Enable debug mode")
 @click.option("--sensitivity", default=20, show_default=True, type=int, help="Contour sensitivity")
 @click.option(
@@ -218,7 +221,7 @@ class GameWindow(Window):
     show_default=True,
     help="Comma-separated list of marker IDs that are reserved for the game board",
 )
-def main(video_id: int, width: int, height: int, debug: bool, sensitivity: int, board_ids: str) -> None:
+def main(video_id: int, width: int, height: int, camera_width: int, camera_height: int, debug: bool, sensitivity: int, board_ids: str) -> None:
     """Start the AR board game with the given configuration"""
 
     Config.WINDOW_WIDTH = width
@@ -229,7 +232,7 @@ def main(video_id: int, width: int, height: int, debug: bool, sensitivity: int, 
     # Parse board_ids string into a list of ints
     board_ids_list = [int(x) for x in board_ids.split(",") if x.strip().isdigit()]
 
-    GameWindow(video_id=video_id, board_ids=board_ids_list)
+    GameWindow(video_id=video_id, camera_width=camera_width, camera_height=camera_height, board_ids=board_ids_list)
 
 
 if __name__ == "__main__":
