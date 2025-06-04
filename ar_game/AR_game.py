@@ -12,6 +12,9 @@ from src.camera import Camera
 from src.config import Config
 from src.perspective_transformer import PerspectiveTransformer
 from src.object_detection import ObjectDetection
+import threading
+import queue
+import numpy as np
 
 
 class GameState(enum.Enum):
@@ -79,33 +82,63 @@ class GameWindow(Window):
         self.game_state_background.anchor_x = self.game_state_background.width // 2
         self.game_state_background.anchor_y = 0
 
-        # Start the pyglet loop
+        # Multithreading setup for frame processing
+        self.frame_queue = queue.Queue(maxsize=1)
+        self.result_queue = queue.Queue(maxsize=1)
+        self.processing_thread = threading.Thread(target=self.processing_loop, daemon=True)
+        self.last_processed_result = (None, None, None, None, None)
+        self.processing_thread.start()
         pyglet.clock.schedule_interval(self.update, 1.0 / Config.UPDATE_RATE)
         pyglet.app.run()
+
+    def processing_loop(self):
+        while True:
+            try:
+                frame = self.frame_queue.get(timeout=1)
+            except queue.Empty:
+                continue
+            # Downscale frame for processing
+            h, w = frame.shape[:2]
+            new_w, new_h = int(w * Config.PROCESSING_SCALE), int(h * Config.PROCESSING_SCALE)
+            small_frame = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
+            # Marker detection and perspective transform on downscaled frame
+            inner_corners, _ = self.marker_detection.get_board_data(small_frame)
+            perspective_transformed_frame = None
+            high, low = None, None
+            if inner_corners is not None:
+                # Scale corners back up to original size for correct perspective
+                scaled_corners = inner_corners / Config.PROCESSING_SCALE
+                perspective_transformed_frame = PerspectiveTransformer.transform(frame, scaled_corners)
+                if perspective_transformed_frame is not None:
+                    perspective_transformed_frame = cv2.flip(perspective_transformed_frame, 1)
+                    high, low = self.object_detection.detect_object(perspective_transformed_frame)
+            # Put results in result_queue
+            try:
+                self.result_queue.put((frame, perspective_transformed_frame, high, low, inner_corners), timeout=0.1)
+            except queue.Full:
+                pass
 
     def is_full_board_visible(self) -> bool:
         return self.game_state != GameState.SEARCHING_AREA
 
     def update(self, dt: float):
         frame = self.camera.get_frame()
+        if frame is not None:
+            # Send frame to processing thread
+            try:
+                self.frame_queue.put(frame, timeout=0.01)
+            except queue.Full:
+                pass
+        # Get latest processed result, or reuse last
+        try:
+            result = self.result_queue.get_nowait()
+            self.last_processed_result = result
+        except queue.Empty:
+            result = self.last_processed_result
+        frame, perspective_transformed_frame, high, low, inner_corners = result
+
         if frame is None:
             return
-
-        # Get board data from raw frame
-        inner_corners, _ = self.marker_detection.get_board_data(frame)
-
-        # Transform game board perspective to screen space, apply modifiers and postprocessing
-        perspective_transformed_frame = None
-        high, low = None, None
-        if inner_corners is not None:
-            perspective_transformed_frame = PerspectiveTransformer.transform(frame, inner_corners)
-            if perspective_transformed_frame is not None:
-                perspective_transformed_frame = cv2.flip(perspective_transformed_frame, 1)
-
-                # Object detection
-                high, low = self.object_detection.detect_object(perspective_transformed_frame)
-                self.game_manager._update_sword(high, low)
-
         image_data = FrameTransformer.cv2_to_pyglet(
             perspective_transformed_frame if perspective_transformed_frame is not None else frame
         )
@@ -175,8 +208,8 @@ class GameWindow(Window):
 
 @click.command()
 @click.option("--video-id", default=0, type=int, help="Camera video ID")
-@click.option("--width", default=640, type=int, help="Width of the application window")
-@click.option("--height", default=480, type=int, help="Height of the application window")
+@click.option("--width", default=1920, type=int, help="Width of the application window")
+@click.option("--height", default=1080, type=int, help="Height of the application window")
 @click.option("--debug", is_flag=True, help="Enable debug mode")
 @click.option("--sensitivity", default=20, show_default=True, type=int, help="Contour sensitivity")
 @click.option(

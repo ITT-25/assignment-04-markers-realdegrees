@@ -34,9 +34,6 @@ It is recommended to stay on the default resolution (1920x1080)*(I did not make 
 If you do not immediately see your webcam feed in the app, adjust the `--video-id` param.  
 If the program does not detect any markers on the board, your webcam is likely mirrored.    
 
-> ⚠️ PERFORMANCE: Using my default webcam resulted in ~3 FPS. OBS Virtual Cam (using the same webcam) results in steady 60+ FPS.
-If you get unreasonably bad performance try a different setup or a virtual camera.
-
 > ⚠️ LIGHTING: The game works very good in low light conditions due to the marker caching, marker interpolation and robust fingertip detection, however it is recommended to have decent lighting conditions
 If the game doesn't work as expected you can adjust the `--sensitivity` (Lower for bright environments e.g. 15, Higher for dark environments e.g. 70+)
 This might also depend on the webcam so if you don't get proper tracking play around with the sensitivity using the `--debug` flag until the sword follows your fingertip correctly during gameplay. I got vastly different results on my laptop vs pc.
