@@ -31,10 +31,10 @@ while True:
         aruco.drawDetectedMarkers(frame, corners)
 
     # Display the frame
-    cv2.imshow('frame', frame)
+    cv2.imshow("frame", frame)
 
     # Wait for a key press and check if it's the 'q' key
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
 # Release the video capture object and close all windows

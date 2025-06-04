@@ -10,30 +10,28 @@ from pyglet.math import Mat4, Vec3
 from src.AR_model import Model
 
 
-INVERSE_MATRIX = np.array([ [ 1.0, 1.0, 1.0, 1.0],
-                            [-1.0,-1.0,-1.0,-1.0],
-                            [-1.0,-1.0,-1.0,-1.0],
-                            [ 1.0, 1.0, 1.0, 1.0]])
+INVERSE_MATRIX = np.array(
+    [[1.0, 1.0, 1.0, 1.0], [-1.0, -1.0, -1.0, -1.0], [-1.0, -1.0, -1.0, -1.0], [1.0, 1.0, 1.0, 1.0]]
+)
+
 
 ## to convert color space of opencv to color space of pyglet
 ## https://gist.github.com/nkymut/1cb40ea6ae4de0cf9ded7332f1ca0d55
-def cv2glet(img,fmt):
-    '''Assumes image is in BGR color space. Returns a pyimg object'''
-    if fmt == 'GRAY':
-      rows, cols = img.shape
-      channels = 1
+def cv2glet(img, fmt):
+    """Assumes image is in BGR color space. Returns a pyimg object"""
+    if fmt == "GRAY":
+        rows, cols = img.shape
+        channels = 1
     else:
-      rows, cols, channels = img.shape
+        rows, cols, channels = img.shape
 
     raw_img = Image.fromarray(img).tobytes()
 
     top_to_bottom_flag = -1
-    bytes_per_row = channels*cols
-    pyimg = pyglet.image.ImageData(width=cols, 
-                                   height=rows, 
-                                   fmt=fmt, 
-                                   data=raw_img, 
-                                   pitch=top_to_bottom_flag*bytes_per_row)
+    bytes_per_row = channels * cols
+    pyimg = pyglet.image.ImageData(
+        width=cols, height=rows, fmt=fmt, data=raw_img, pitch=top_to_bottom_flag * bytes_per_row
+    )
     return pyimg
 
 
@@ -41,11 +39,20 @@ def cv2glet(img,fmt):
 ## returns rotation and translation vectors of marker in camera coordinate system
 def estimatePoseMarker(corners, mtx, distortion):
     global length
-    length = abs(corners[0][0][0] - corners[0][1][0]) if (abs(corners[0][0][0] - corners[0][1][0]) > abs(corners[0][0][0] - corners[0][2][0])) else abs(corners[0][0][0] - corners[0][2][0])
-    marker_points = np.array([[-length / 2, length / 2, 0],
-                              [length / 2, length / 2, 0],
-                              [length / 2, -length / 2, 0],
-                              [-length / 2, -length / 2, 0]], dtype=np.float32)
+    length = (
+        abs(corners[0][0][0] - corners[0][1][0])
+        if (abs(corners[0][0][0] - corners[0][1][0]) > abs(corners[0][0][0] - corners[0][2][0]))
+        else abs(corners[0][0][0] - corners[0][2][0])
+    )
+    marker_points = np.array(
+        [
+            [-length / 2, length / 2, 0],
+            [length / 2, length / 2, 0],
+            [length / 2, -length / 2, 0],
+            [-length / 2, -length / 2, 0],
+        ],
+        dtype=np.float32,
+    )
     rvecs = []
     tvecs = []
     for c in corners:
@@ -56,8 +63,8 @@ def estimatePoseMarker(corners, mtx, distortion):
 
 
 def get_center_of_marker(corners):
-    center_x = corners[0][0] - ((corners[0][0] - corners[2][0])/2)
-    center_y = corners[0][1] - ((corners[0][1] - corners[2][1])/2)
+    center_x = corners[0][0] - ((corners[0][0] - corners[2][0]) / 2)
+    center_y = corners[0][1] - ((corners[0][1] - corners[2][1]) / 2)
     return (center_x, center_y)
 
 
@@ -71,7 +78,9 @@ window = pyglet.window.Window(WINDOW_WIDTH, WINDOW_HEIGHT, resizable=False)
 
 ## setup the camera
 cap = cv2.VideoCapture(2)
-cameraMatrix = np.array([[534.34144579, 0., 339.15527836], [0., 534.68425882,  233.84359494], [0., 0., 1.]], dtype=np.float64)
+cameraMatrix = np.array(
+    [[534.34144579, 0.0, 339.15527836], [0.0, 534.68425882, 233.84359494], [0.0, 0.0, 1.0]], dtype=np.float64
+)
 distCoeffs = np.array([0, 0, 0, 0], dtype=np.float64)
 
 ## setup aruco detector
@@ -101,22 +110,27 @@ def on_draw():
             rvec, tvec = estimatePoseMarker(corners[i], cameraMatrix, distCoeffs)
 
             # convert the rotation vector into a rotation matrix
-            # then, make OpenCV matrix compatible with OpenGL 
+            # then, make OpenCV matrix compatible with OpenGL
             rmtx = cv2.Rodrigues(rvec[0])[0]
-            view_matrix = np.array([[rmtx[0][0],rmtx[0][1],rmtx[0][2],tvec[0,0,0]],
-                                    [rmtx[1][0],rmtx[1][1],rmtx[1][2],tvec[0,0,1]],
-                                    [rmtx[2][0],rmtx[2][1],rmtx[2][2],tvec[0,0,2]],
-                                    [0.0       ,0.0       ,0.0       ,1.0    ]], dtype="object")
+            view_matrix = np.array(
+                [
+                    [rmtx[0][0], rmtx[0][1], rmtx[0][2], tvec[0, 0, 0]],
+                    [rmtx[1][0], rmtx[1][1], rmtx[1][2], tvec[0, 0, 1]],
+                    [rmtx[2][0], rmtx[2][1], rmtx[2][2], tvec[0, 0, 2]],
+                    [0.0, 0.0, 0.0, 1.0],
+                ],
+                dtype="object",
+            )
             view_matrix = view_matrix * INVERSE_MATRIX
             view_matrix = np.transpose(view_matrix)
             for model in models:
                 model.setup_translation(marker_id, view_matrix, position, length)
 
-    img = cv2glet(frame, 'BGR')
+    img = cv2glet(frame, "BGR")
     window.clear()
-    img.blit(-WINDOW_WIDTH/2, -WINDOW_HEIGHT/2, 0)
+    img.blit(-WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2, 0)
     for model in models:
-            model.batch.draw()
+        model.batch.draw()
 
 
 def animate(dt):
@@ -124,7 +138,7 @@ def animate(dt):
     # global time
     # time += dt
     for model in models:
-        model.animate()    
+        model.animate()
 
 
 # not relevant for us for now
@@ -140,7 +154,18 @@ if __name__ == "__main__":
     glEnable(GL_CULL_FACE)
 
     models = []
-    models.append(Model(path="enton.obj", id=5, win_w=WINDOW_WIDTH, win_h=WINDOW_HEIGHT, rot_x=270, rot_y=90, rot_z=270, scaling_factor=0.2))
+    models.append(
+        Model(
+            path="enton.obj",
+            id=5,
+            win_w=WINDOW_WIDTH,
+            win_h=WINDOW_HEIGHT,
+            rot_x=270,
+            rot_y=90,
+            rot_z=270,
+            scaling_factor=0.2,
+        )
+    )
 
     # Set the application wide view matrix (camera):
     window.view = Mat4.look_at(position=Vec3(0, 0, WINDOW_Z), target=Vec3(0, 0, 0), up=Vec3(0, 1, 0))
