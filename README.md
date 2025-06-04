@@ -34,7 +34,7 @@ It is recommended to stay on the default resolution (1920x1080)*(I did not make 
 If you do not immediately see your webcam feed in the app, adjust the `--video-id` param.  
 If the program does not detect any markers on the board, your webcam is likely mirrored.    
 
-> ⚠️ PERFORMANCE: Using my default webcam resulted in ~3 FPS. OBS Virtual Cam results in steady 60+ FPS.
+> ⚠️ PERFORMANCE: Using my default webcam resulted in ~3 FPS. OBS Virtual Cam (with the same webcam) results in steady 60+ FPS.
 If you get unreasonably bad performance try a different setup or a virtual camera.
 
 > ⚠️ LIGHTING: The game works very good in low light conditions due to the marker caching, marker interpolation and robust fingertip detection, however it is recommended to have decent lighting conditions
@@ -92,6 +92,7 @@ python AR_game_3d.py
 **Known Issues**
 - No matter which model I tried or how I exported them from blender I couldn't get the model to have textures.  
 - The models often invert their rotation briefly, likely due to the way marker position and rotation are calculated.  
+- Rotation on the local up axis didn't work so I couldn't get the models to turn towards each other, probably due to them being rotated differently in the model itself and the sample logic doesn't account for that
 
 ## Sources
 
