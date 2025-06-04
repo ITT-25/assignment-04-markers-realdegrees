@@ -34,6 +34,8 @@ For more CLI options use the `--help` flag.
 If you do not immediately see your webcam feed in the app, adjust the `--video-id` param.  
 If the program does not detect any markers on the board, your webcam is likely **mirrored**.    
 
+> ⚠️ PERFORMANCE: I added multithreading and I'm using `blit_into` for minimal performance overhead. Despite that the app runs at like 5 fps on my laptop even at low resolutions when using the hardware webcam. Using a virtual camera like *OBS Virtual Camera* results in smooth 60 fps and on pc it runs fine regardless. If you can't get it to run smoothly please use better hardware or try a virtual camera input instead.  
+
 > ⚠️ LIGHTING: Find the correct sensitivity for your environment and setup using `--debug` and `--sensitivity <num>` params.  
 The default sensitivity of `20` offers good tracking at moderately bright conditions. Higher values will work better in dark environments (e.g. 40, 60, 80, 100+).  
 Tweak the sensitivity in the debug view until the tracking works correctly during gameplay.  
