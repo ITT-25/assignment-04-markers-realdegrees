@@ -33,12 +33,12 @@ class ImageTransformer:
             cv2.circle(self.display_image, (x, y), 8, (0, 0, 255), -1)
 
             if len(self.points) == 4:
-                # Draw lines between all points to form a quadrilateral
-                cv2.line(self.display_image, self.points[0], self.points[1], (0, 255, 0), 2)
-                cv2.line(self.display_image, self.points[1], self.points[2], (0, 255, 0), 2)
-                cv2.line(self.display_image, self.points[2], self.points[3], (0, 255, 0), 2)
-                cv2.line(self.display_image, self.points[3], self.points[0], (0, 255, 0), 2)
+                # Use ordered points to draw the quad outline
                 self.points = ordered_points
+                for i in range(4):
+                    pt1 = tuple(map(int, self.points[i]))
+                    pt2 = tuple(map(int, self.points[(i + 1) % 4]))
+                    cv2.line(self.display_image, pt1, pt2, (0, 255, 0), 2)
 
             cv2.imshow(MAIN_WINDOW_NAME, self.display_image)
 
