@@ -19,13 +19,13 @@ class Config:
     
     @staticmethod
     def get_gameobject_base_scale() -> float:
-        """Returns the base scale for game objects."""
-        return 1 / (1920 / Config.WINDOW_WIDTH)
+        """Returns the base scale for game objects, relative to a reference width (e.g., 1920)."""
+        return (Config.WINDOW_WIDTH / 1920) * 0.9
 
     @staticmethod
     def get_fruit_speed_range() -> tuple[float, float]:
-        """Returns the range of fruit speeds."""
-        return Config.WINDOW_WIDTH * 0.15 / Config.get_gameobject_base_scale(), Config.WINDOW_WIDTH * 0.25 / Config.get_gameobject_base_scale()
+        """Returns the range of fruit speeds, proportional to window width."""
+        return Config.WINDOW_WIDTH * 0.4, Config.WINDOW_WIDTH * 0.6
 
     # Old
     COLUMN_GAP: int = 10
