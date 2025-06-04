@@ -7,7 +7,7 @@ import pyglet
 from pyglet.gl import *
 from pyglet.math import Mat4, Vec3
 
-from AR_model import Model
+from src.AR_model import Model
 
 
 INVERSE_MATRIX = np.array([ [ 1.0, 1.0, 1.0, 1.0],
