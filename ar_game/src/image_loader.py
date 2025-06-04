@@ -57,7 +57,7 @@ class ImageLoader:
         # Store the image and create a sprite
         self.images[image_name] = pyglet_image
         sprite = pyglet.sprite.Sprite(pyglet_image)
-        sprite.scale = scale * Config.GAMEOBJECT_BASE_SCALE
+        sprite.scale = scale * Config.get_gameobject_base_scale()
         self.sprites[image_name] = sprite
 
         return sprite

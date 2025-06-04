@@ -14,7 +14,7 @@ class Camera:
             raise ValueError(f"Could not open camera with ID {video_id}")
 
         # Find and set the highest possible reslution supported by the camera
-        for width, height in COMMON_RESOLUTIONS_ASCENDING.__reversed__():
+        for width, height in COMMON_RESOLUTIONS_ASCENDING:
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
             self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))

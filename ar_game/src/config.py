@@ -15,11 +15,16 @@ class Config:
     UPDATE_RATE: int = 60
     CONTOUR_SENSITIVITY: int = 27
     MIN_CONTOUR_AREA: int = 1000
+    
+    @staticmethod
+    def get_gameobject_base_scale() -> float:
+        """Returns the base scale for game objects."""
+        return 1 / (1920 / Config.WINDOW_WIDTH)
 
     @staticmethod
     def get_fruit_speed_range() -> tuple[float, float]:
         """Returns the range of fruit speeds."""
-        return Config.WINDOW_WIDTH * 0.325, Config.WINDOW_WIDTH * 0.525
+        return Config.WINDOW_WIDTH * 0.15 / Config.get_gameobject_base_scale(), Config.WINDOW_WIDTH * 0.25 / Config.get_gameobject_base_scale()
 
     # Old
     COLUMN_GAP: int = 10
