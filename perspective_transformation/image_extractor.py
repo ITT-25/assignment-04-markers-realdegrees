@@ -59,39 +59,30 @@ class ImageTransformer:
 
     # ? This is required because apparently the order of points influences the final "perspective origin" so by manually reordering it outputs the result image at the same rotation as the original image
     def order_points(self, points: List[Tuple[int, int]]) -> Optional[np.ndarray]:
-        """Sort 4 points into top-left, top-right, bottom-right, bottom-left."""
+        """Sort 4 points into top-left, top-right, bottom-right, bottom-left robustly."""
         print("Ordering points for consistent transformation...")
         points_np = np.array(points, dtype="float32")
 
         if len(points_np) != 4:
-            return
+            return None
 
-        # Calculate the center of the points
-        center = np.mean(points_np, axis=0)
+        # Sort by y (vertical position)
+        y_sorted = points_np[np.argsort(points_np[:, 1]), :]
+        top_two = y_sorted[:2, :]
+        bottom_two = y_sorted[2:, :]
 
-        # Classify points based on their position relative to the center
-        top_left = None
-        top_right = None
-        bottom_right = None
-        bottom_left = None
+        # Sort top two by x (horizontal position)
+        tl, tr = top_two[np.argsort(top_two[:, 0]), :]
+        # Sort bottom two by x
+        bl, br = bottom_two[np.argsort(bottom_two[:, 0]), :]
 
-        for point in points_np:
-            is_above = point[1] < center[1]
-            is_left = point[0] < center[0]
+        ordered = np.array([tl, tr, br, bl], dtype="float32")
 
-            if is_above and is_left:
-                top_left = point
-            elif is_above and not is_left:
-                top_right = point
-            elif not is_above and not is_left:
-                bottom_right = point
-            elif not is_above and is_left:
-                bottom_left = point
+        # Ensure all points are unique (no duplicates)
+        if len({tuple(pt) for pt in ordered}) != 4:
+            return None
 
-        if top_left is None or top_right is None or bottom_right is None or bottom_left is None:
-            return
-
-        return np.array([top_left, top_right, bottom_right, bottom_left], dtype="float32")
+        return ordered
 
     def is_main_window_closed(self) -> bool:
         """Check if the main window is still open"""
