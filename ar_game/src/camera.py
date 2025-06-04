@@ -3,25 +3,20 @@ import cv2
 import numpy as np
 from src.config import Config
 
-COMMON_RESOLUTIONS_ASCENDING = [(640, 480), (800, 600), (1024, 768), (1280, 720), (1920, 1080)]
-
 
 class Camera:
     def __init__(self, video_id: int):
         """Initialize camera capture with specified device ID."""
+
         self.cap = cv2.VideoCapture(video_id, cv2.CAP_DSHOW)
         if not self.cap.isOpened():
             raise ValueError(f"Could not open camera with ID {video_id}")
 
-        # Find and set the highest possible reslution supported by the camera
-        for width, height in COMMON_RESOLUTIONS_ASCENDING:
-            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-            self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-            if self.width == width and self.height == height:
-                break
+        # Find and set the highest possible resolution supported by the camera (capped at full hd)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+        self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     def get_frame(self) -> Optional[np.ndarray]:
         """Get current frame in pyglet-compatible format.
